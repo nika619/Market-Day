@@ -1,1 +1,1 @@
-module.exports = { headline: 'THROWN\nBY HAND\nEVERY DAY', subline: 'Stoneware mugs, from our wheel\nto your morning.', cta: 'VISIT US', product: 'market/product-demo-2.jpg', logo: 'market/logo-demo-2.svg', brand: [70, 150, 120], brandOpacity: 1, accent: [160, 215, 180] };
+module.exports = { headline: 'THROWN\nBY HAND\nEVERY DAY', subline: 'Stoneware mugs, from our wheel\nto your morning.', cta: 'VISIT US', product: 'market/product-cut-2.webp', logo: 'market/logo-demo-2.svg', brand: [70, 150, 120], brandOpacity: 1, accent: [160, 215, 180] };
