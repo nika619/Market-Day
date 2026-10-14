@@ -3,7 +3,7 @@
 A 15-second, 1920×1080 looping ad template built entirely as an SVGator project for the
 [SVGator × Contra animation template challenge](https://contra.com/community/topic/svgatorchallenge).
 A seller ties off a parcel at a market stall, the string lights come on, they hold out a wooden tray,
-and **your product** lands on it before **your headline** fades up on a frosted-glass card.
+and **your product** drops onto it and settles; a kraft label card hops on to say what it is, then **your headline** fades up on a frosted-glass card.
 
 One template, three businesses: an Italian wood-fired pizza café, a candle maker and a ceramics studio,
 each made by changing the same handful of named layers. No keyframe is touched.
@@ -14,8 +14,9 @@ each made by changing the same handful of named layers. No keyframe is touched.
 |---|---|
 | `headline (max 3 lines, 9 chars each)` | Retype. The last line takes the accent colour. |
 | `subline` | Retype (two short lines). |
-| `cta-text (max 12 chars)` | Retype. |
-| `product-image` | Image options → Replace image. Any photo; it is cropped to a circle. |
+| `cta-text (max 9 chars)` | Retype. The button is a fixed pill. |
+| `product-image` | Image options → Replace image. A transparent PNG/WebP cut-out with its base on the bottom edge; it stands (or lies flat) on the tray. |
+| `label-title (max 12 chars)` / `label-detail (max 22 chars)` | Retype: the product name and one line about it, on the label card. |
 | `logo` | Image options → Replace image. Light logo, transparent background. |
 | `brand-color` | One soft-light rectangle that grades the whole film. Opacity 0 keeps the warm original. |
 
@@ -31,6 +32,7 @@ Motion lives on wrapper groups, never on the text or on the swappable images, so
 - `build/` — the code that writes the SVGator project documents and checks them:
   - `scene-market.js` builds the Market Day document (multiplane camera, frosted card, slots) from a content file (`content-market*.js`).
   - `player.js` + `preview-market.html` play a document locally with the same transform maths as SVGator's export; `shots.js` / `fill.js` render frames through headless Edge.
+  - `make-pizza-cut.py` lays a top-down food photo flat in the tray's perspective (cut-out, crust side, contact shadow); `sv-patch.js` prints the `edit_part` payloads that bring the live projects up to the build.
   - `prep-market.py` turns the generated art into the web-ready files in `assets/market/`; `mix-market.py` builds the soundtrack for the proof video.
   - `scene-take.js`, `scene-unbox.js`, `track.py`, `take-frames.py` — experiments: a live-action "one take" build and a native vector unboxing with real 3D projection.
 
