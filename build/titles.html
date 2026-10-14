@@ -1,0 +1,75 @@
+<!doctype html><meta charset="utf8"><title>Market Day titles</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=DM+Sans:wght@500;700&display=block">
+<style>
+  html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:transparent}
+  .layer{position:absolute;inset:0}
+  .bg{background:radial-gradient(ellipse at 50% 46%,#2a1a10 0%,#140c07 62%,#0b0704 100%)}
+  .kicker{position:absolute;font:700 24px/1 'DM Sans';letter-spacing:.32em;color:#e9dcc4;text-transform:uppercase}
+  .h{position:absolute;font:700 128px/1.02 'Fraunces';color:#f6eedc;letter-spacing:1px;white-space:nowrap}
+  .acc{color:#f4be6e}
+  .rule{position:absolute;height:3px;background:#f4be6e;border-radius:2px}
+  .chip{position:absolute;left:96px;bottom:118px;display:flex;align-items:center;gap:18px;padding:16px 28px 16px 22px;border-radius:40px;
+        background:linear-gradient(135deg,rgba(40,26,16,.72),rgba(24,16,10,.8));border:1.2px solid rgba(255,255,255,.28);backdrop-filter:blur(6px)}
+  .chip b{font:700 26px 'DM Sans';color:#f4be6e;letter-spacing:.08em}
+  .chip span{font:500 26px 'DM Sans';color:#f3e9d6}
+  .card{position:absolute;left:84px;top:110px;padding:34px 44px 36px;border-radius:32px;
+        background:linear-gradient(135deg,rgba(32,22,14,.84),rgba(18,12,8,.9));border:1.2px solid rgba(255,255,255,.26)}
+  .card .t{font:700 58px/1.12 'Fraunces';color:#f6eedc;white-space:nowrap}
+  .card .s{margin-top:14px;font:500 26px 'DM Sans';color:#dccfb6;letter-spacing:.04em}
+  .end .h{font-size:150px}
+  .sub{position:absolute;font:500 32px/1.35 'DM Sans';color:#e6d9c0}
+  .tags{position:absolute;font:700 28px 'DM Sans';color:#f4be6e;letter-spacing:.06em}
+  .thumb{position:absolute;width:400px;height:225px;border-radius:18px;overflow:hidden;border:1.5px solid rgba(255,255,255,.3);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb i{position:absolute;left:14px;bottom:12px;font:700 18px 'DM Sans';font-style:normal;color:#f6eedc;letter-spacing:.12em;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+</style>
+<body>
+<!-- S0: opening title -->
+<div id="s0" class="layer bg">
+  <div id="s0k" class="kicker" style="left:160px;top:330px">Market Day · an SVGator template</div>
+  <div id="s0a" class="h" style="left:150px;top:392px">One template.</div>
+  <div id="s0b" class="h acc" style="left:150px;top:532px">Three businesses.</div>
+  <div id="s0r" class="rule" style="left:158px;top:688px;width:0"></div>
+</div>
+<!-- business chips -->
+<div id="c1" class="chip"><b>01</b><span>Pizza café · Forno Lucia</span></div>
+<div id="c2" class="chip"><b>02</b><span>Candle maker · Ember &amp; Oak</span></div>
+<div id="c3" class="chip"><b>03</b><span>Ceramics studio · Clay &amp; Co</span></div>
+<!-- editor caption -->
+<div id="ed" class="card"><div class="t">Swap 3 lines, 2 images,<br><span class="acc">1 colour.</span></div><div class="s">No keyframe touched · about five minutes</div></div>
+<!-- end card -->
+<div id="s5" class="layer bg end">
+  <div id="s5k" class="kicker" style="left:160px;top:236px">A free SVGator template</div>
+  <div id="s5a" class="h" style="left:150px;top:282px">Market <span class="acc">Day</span></div>
+  <div id="s5s" class="sub" style="left:160px;top:460px">For anyone who sells by hand.<br>Made in SVGator through the MCP, with Claude.</div>
+  <div id="s5t" class="tags" style="left:160px;top:590px">@SVGatorApp &nbsp; #svgatorchallenge</div>
+  <div id="th1" class="thumb" style="left:160px;top:700px"><img src="thumb-pizza.jpg"><i>PIZZA CAFÉ</i></div>
+  <div id="th2" class="thumb" style="left:600px;top:700px"><img src="thumb-candle.jpg"><i>CANDLE MAKER</i></div>
+  <div id="th3" class="thumb" style="left:1040px;top:700px"><img src="thumb-mugs.jpg"><i>CERAMICS STUDIO</i></div>
+</div>
+<script>
+// Deterministic timeline: every element's look is a pure function of t (ms), so headless screenshots at #t are exact frames.
+const TL = { s0: [0, 2800], c1: [3300, 5700], ed: [18000, 24500], c2: [25100, 27500], c3: [31600, 34000], s5: [37800, 42300] };
+const bez = (x1, y1, x2, y2) => x => { let lo = 0, hi = 1, u = x; for (let i = 0; i < 24; i++) { u = (lo + hi) / 2; const b = 3*(1-u)*(1-u)*u*x1 + 3*(1-u)*u*u*x2 + u*u*u; b < x ? lo = u : hi = u; } return 3*(1-u)*(1-u)*u*y1 + 3*(1-u)*u*u*y2 + u*u*u; };
+const OUT = bez(.16, 1, .3, 1), PREM = bez(.4, 0, .2, 1), IN = bez(.7, 0, .84, 0);
+const k = (t, a, b, e = OUT) => e(Math.min(1, Math.max(0, (t - a) / (b - a))));
+const $ = id => document.getElementById(id);
+// a line that wipes in left-to-right while rising, the same move as the template's headline
+function wipe(el, t, t0, dur = 700, rise = 26) { const u = k(t, t0, t0 + dur); el.style.clipPath = `inset(-20% ${100 - u * 100}% -20% 0)`; el.style.transform = `translateY(${(1 - u) * rise}px)`; el.style.opacity = Math.min(1, u * 1.6); }
+function fadeRise(el, t, t0, dur = 600, rise = 18) { const u = k(t, t0, t0 + dur); el.style.opacity = u; el.style.transform = `translateY(${(1 - u) * rise}px)`; }
+function exit(el, t, t0, dur = 400) { const u = k(t, t0, t0 + dur, IN); if (u > 0) { el.style.opacity = (parseFloat(el.style.opacity || 1)) * (1 - u); el.style.transform += ` translateY(${-14 * u}px)`; } }
+function show(id, t) { const [a, b] = TL[id], on = t >= a && t < b; $(id).style.display = on ? '' : 'none'; return on; }
+function frame(t) {
+  if (show('s0', t)) { const o = 1 - k(t, 2450, 2800, IN); $('s0').style.opacity = o;
+    fadeRise($('s0k'), t, 150, 600, 12); wipe($('s0a'), t, 300); wipe($('s0b'), t, 560); $('s0r').style.width = 430 * k(t, 950, 1600, PREM) + 'px'; }
+  for (const id of ['c1', 'c2', 'c3']) if (show(id, t)) { const [a, b] = TL[id], el = $(id), u = k(t, a, a + 650);
+    el.style.opacity = u * (1 - k(t, b - 450, b, IN)); el.style.transform = `translateX(${(1 - u) * -34}px)`; }
+  if (show('ed', t)) { const [a, b] = TL.ed, el = $('ed'); wipe(el, t, a, 750, 20); exit(el, t, b - 420); }
+  if (show('s5', t)) { const a = TL.s5[0]; $('s5').style.opacity = k(t, a, a + 450, PREM);
+    fadeRise($('s5k'), t, a + 200, 600, 12); wipe($('s5a'), t, a + 350, 800, 30); fadeRise($('s5s'), t, a + 800); fadeRise($('s5t'), t, a + 1100);
+    ['th1', 'th2', 'th3'].forEach((id, i) => fadeRise($(id), t, a + 1300 + i * 160, 700, 40)); }
+}
+window.frame = frame;
+const h = +location.hash.slice(1); frame(location.hash ? h : 0);
+if (!location.hash) { const t0 = performance.now(); (function loop() { frame((performance.now() - t0) % 42300); requestAnimationFrame(loop); })(); }
+</script>
