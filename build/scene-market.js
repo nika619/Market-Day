@@ -4,7 +4,9 @@ const fs = require('fs'), path = require('path');
 const SET = process.argv[2] || 'set1', CONTENT = require('./content-market' + SET.slice(3) + '.js'); // set1 candles, set2 mugs, set3 pizza
 const BASE = 'https://cdn.jsdelivr.net/gh/nika619/conjure-svgator@main/assets/';
 const W = 1920, H = 1080, DUR = 15000, P = [960, 540];
-const TRAY0 = [948, 678], DX = 400, TRAY = [TRAY0[0] + DX, TRAY0[1]], ORB = [TRAY[0] + 5, 470], OR = 175, F1 = [1260, 585], MK = f => 'market/' + f; // seller is placed so the tray sits right of the text card; the product floats above the tray
+const TRAY0 = [948, 678], DX = 400, TRAY = [TRAY0[0] + DX, TRAY0[1]], F1 = [1260, 585], MK = f => 'market/' + f; // seller is placed so the tray sits right of the text card
+// on the tray floor, in seller-plate pixels: where the product touches the tray (bottom centre of its box) and its box
+const BASE_PT = [950, 818], PBOX = [860, 380], PC = [BASE_PT[0] + DX, 640] /* product centre in the scene */, LAND = 9500 /* the product touches the tray */;
 const cb = (a, b, c, d) => ({ type: 'cubic-bezier', value: { from: { x: a, y: b }, to: { x: c, y: d } } });
 const LIN = { type: 'linear', value: null };
 const IO = cb(.45, 0, .55, 1), OUT = cb(.16, 1, .3, 1), IN = cb(.7, 0, .84, 0), BACK = cb(.34, 1.56, .64, 1), SOFT = cb(.3, 0, .15, 1);
@@ -66,13 +68,13 @@ const osc = (t0, t1, period, a, b, e = LIN) => { const out = []; for (let t = t0
 const light = { blend: 'screen' };
 
 // ---------------- camera for the scene: [time, zoom, scene point, where it sits on screen, easing to the next key, roll in degrees] ----------------
-const MIDP = [ORB[0], 560];
+const MIDP = [PC[0], 560];
 const MIDA = MIDP; // at zoom 1.0 the scene sits where it was composed, so the whole tray fits; the slow push starts from here without a jump
 const CAM = [
   [3000, 1.55, [760, 300], [960, 520], cb(.25, .1, .25, 1), -1.4],
   [5850, 1.22, [1000, 520], [975, 540], IN, .3],
   [6200, 1.4, [1380, 600], [900, 560], LIN, 1.0],
-  [9000, 1.9, [ORB[0], 480], [960, 540], cb(.5, 0, .1, 1), -1.5],
+  [9000, 1.6, [PC[0], 650], [960, 540], cb(.5, 0, .1, 1), -1.5],
   [10800, 1.0, [960, 540], [960, 540], IO, 0],
   [13700, 1.06, MIDP, MIDA, IN, -.7],
   [15000, 1.13, MIDP, [MIDA[0] - 10, MIDA[1] + 6], LIN, -1.3],
@@ -85,6 +87,8 @@ const camKeys = (d, from = 0) => { const L = CAM.filter(k => k[0] >= from); cons
   return out; };
 const layer = (title, d, kids, o = {}) => piv(title, P, { a: camKeys(d, o.from), kids, ...o });
 const place = kids => E('g', 'seller placement (tray sits right of the text card)', { o: TRAY, t: [-TRAY0[0], -TRAY0[1]], kids });
+const BREATH = { s: osc(3000, 15000, 12000, [1, 1], [1.005, 1.011], IO), r: osc(3000, 15000, 12000, -.3, .35, IO) };
+const breathe = (title, kids) => place([piv(title, [960, 1080], { a: BREATH, kids })]); // whatever rests on the tray moves with the seller
 
 // ---------------- shot 1: the counter (macro close-up of hands tying a parcel) ----------------
 const dustA = Array.from({ length: 5 }, (_, i) => { const x = R(700, 1900), y = R(80, 1000), z = R(26, 120); return spr('bokeh', 'glow-gold.jpg', x, y, z, z, { ...light, a: { o: [[0, [x, y], LIN], [3000, [x - z * R(1, 2.4), y - R(10, 50)]]], op: [[0, 0, IO], [R(500, 1200), R(.25, .6), IO], [3000, R(.1, .4)]] } }); });
@@ -113,7 +117,7 @@ const scene = E('g', 'shot-2 + shot-4 the stall (multiplane camera)', { a: { op:
   layer('depth-1 stall', .6, [spr('stall', MK('stall.jpg'), 960, 540, 2300, 1294), ...LIGHTS.map(bulbGlow)]),
   shafts,
   layer('depth-3 seller', 1, [
-    place([piv('seller (breathes)', [960, 1080], { a: { s: osc(3000, 15000, 12000, [1, 1], [1.005, 1.011], IO), r: osc(3000, 15000, 12000, -.3, .35, IO) }, kids: [full('seller', MK('seller.webp'))] })]),
+    breathe('seller (breathes)', [full('seller', MK('seller.webp'))]),
     E('g', 'drift, dust', { kids: [drift('tag', 70, 300, 640, 3500, 2600), drift('sprig', 56, 700, 380, 3900, 2300), drift('petal', 60, 520, 860, 4300, 2000), drift('parcel', 80, 860, 560, 10200, 3600), ...Array.from({ length: 10 }, mote)] }),
   ]),
   rect('dusk (lifts as the string lights come on)', 0, 0, W, H, { fill: col([10, 18, 44]), a: { op: [[3000, .6], [3400, .6], [5400, 0, IO]] } }),
@@ -167,7 +171,7 @@ const text = E('g', 'EDIT ME 1 - text: headline, subline, cta-text', { a: { op: 
   E('path', 'light-thread (from the button to the product)', { shape: { path: [
     { x: HX + CTAW, y: 772, type: 'cusp', mode: 0, end: { x: HX + CTAW + 260, y: 772 } },
     { x: 1000, y: 850, type: 'cusp', mode: 0, start: { x: 780, y: 880 }, end: { x: 1120, y: 820 } },
-    { x: ORB[0] - OR + 12, y: ORB[1] + 120, type: 'cusp', mode: 0, start: { x: 1080, y: 740 } }] },
+    { x: 1150, y: 700, type: 'cusp', mode: 0, start: { x: 1090, y: 790 } }] },
     fill: { type: 'none' }, stroke: { paint: col(ACC), width: 1.6, dashArray: [1500], dashOffset: 1500, lineCap: 'round', opacity: .85 }, a: { dash: [[11250, 1500, cb(.4, 0, .2, 1)], [12100, 0]], op: [[10200, 0], [11250, 1, LIN], [12100, 1, IO], [13000, .45]] } }),
 ] });
 
@@ -175,21 +179,19 @@ const text = E('g', 'EDIT ME 1 - text: headline, subline, cta-text', { a: { op: 
 const brand = rect('brand-color (one fill grades the whole film like a colour filter; opacity 0 = original warm light)', 0, 0, W, H, { fill: col(C.brand), blend: 'soft-light', op: C.brandOpacity });
 
 // ---------------- EDIT ME 2: images ----------------
-const burst = (i, f) => { const a = (-165 + i * 36 + R(-10, 10)) * Math.PI / 180, d = R(260, 460), w = { tag: 64, petal: 62, sprig: 46, parcel: 78 }[f]; return spr('burst ' + f, MK(f + '.webp'), ORB[0], ORB[1], w, w * ASP[f], { a: { o: [[9000, ORB, OUT], [9950, [ORB[0] + Math.cos(a) * d, ORB[1] + Math.sin(a) * d + 150]]], r: [[9000, 0, LIN], [9950, R(-260, 260)]], op: [[8999, 0], [9000, 1], [9700, 1], [9950, 0]] } }); };
+const fadeOut = v => [[14050, v], [14250, f1(v * .9)], [14450, f1(v * .5)], [14650, f1(v * .1)], [14850, 0]]; // follows the eased fade to black (opacity keys stay linear)
 const images = E('g', 'EDIT ME 2 - images: product-image, logo', { kids: [
   layer('product (rides the scene camera)', 1, [
-    spr('tray shadow', MK('shadow.png'), TRAY[0] + 4, TRAY0[1] - 20, 420, 105, { a: { op: [[0, 0], [8999, 0], [9000, 0, OUT], [9600, .6, IO], [13900, .6, IN], [14350, 0]], s: [[9000, .5, OUT], [9700, 1], [13900, 1]] } }),
-    piv('product-float', ORB, { a: { s: [[9000, .5, BACK], [9700, 1, LIN], [13900, 1, IN], [14350, 0]], o: [[9000, ORB, LIN], ...osc(9700, 13900, 3300, ORB, [ORB[0], ORB[1] - 9], IO)], op: [[0, 0], [8999, 0], [9000, 1], [14350, 1], [14351, 0]] }, kids: [
-      E('g', 'product-window (circle crop)', { clip: 'c-orb', kids: [
-        E('clipPath', 'circle crop', { id: 'c-orb', kids: [E('ellipse', 'crop', { o: ORB, shape: { radius: { x: OR, y: OR } }, fill: col([255, 255, 255]) })] }),
-        piv('product-drift', ORB, { a: { s: osc(9000, 15000, 6000, 1.1, 1.0, IO) }, kids: [spr('product-image', C.product, ORB[0], ORB[1], OR * 2, OR * 2, { fit: 'xMidYMid slice' })] }),
+    breathe('product on the tray (moves with the seller)', [
+      spr('contact shadow', MK('shadow.png'), BASE_PT[0], BASE_PT[1] - 22, 560, 120, { a: { op: [[0, 0], [9000, 0], [LAND, .55], ...fadeOut(.55)], s: [[9000, .45, IN], [LAND, 1]] } }),
+      piv('product-drop (lands on the tray)', BASE_PT, { a: { o: [[9000, [BASE_PT[0], BASE_PT[1] - 100], IN], [LAND, BASE_PT]], op: [[0, 0], [8999, 0], [9000, 0], [9150, 1], ...fadeOut(1)] }, kids: [
+        piv('product-settle (squash on landing)', BASE_PT, { a: { s: [[LAND, [1, 1], OUT], [LAND + 110, [1.035, .955], IO], [LAND + 330, [.99, 1.012], IO], [LAND + 520, [1, 1]]] }, kids: [
+          E('image', 'product-image (transparent cut-out, its base on the bottom edge)', { o: [BASE_PT[0] - PBOX[0] / 2, BASE_PT[1] - PBOX[1]], shape: img(C.product, PBOX[0], PBOX[1], 'xMidYMax meet') }),
+        ] }),
       ] }),
-      E('ellipse', 'product-rim (draws itself)', { o: ORB, r: -90, shape: { radius: { x: OR, y: OR } }, fill: { type: 'none' }, stroke: { paint: col(CREAM), width: 6, dashArray: [f1(2 * Math.PI * OR)], dashOffset: f1(2 * Math.PI * OR), opacity: .95 }, a: { dash: [[9000, 2 * Math.PI * OR, cb(.5, 0, .2, 1)], [9900, 0]] } }),
-      spr('flash settling on the product', 'glow.jpg', ORB[0], ORB[1], OR * 5, OR * 5, { ...light, a: { op: [[9000, 1, cb(.5, 0, .6, 1)], [9950, 0]], s: [[9000, 1.3, OUT], [9950, .7]] } }),
-    ] }),
-    E('ellipse', 'shockwave', { o: ORB, shape: { radius: { x: OR, y: OR } }, fill: { type: 'none' }, stroke: { paint: col(WHITEGOLD), width: 3, opacity: 1 }, a: { s: [[9000, .7, OUT], [9900, 3]], op: [[8999, 0], [9000, .9, OUT], [9900, 0]] } }),
-    ...['tag', 'petal', 'sprig', 'parcel', 'petal'].map((f, i) => burst(i, f)),
-    spr('last glint', 'spark.jpg', ORB[0], ORB[1], 420, 420, { ...light, a: { op: [[0, 0], [14230, 0, OUT], [14370, 1, IO], [14750, 0]], s: [[14230, .2, OUT], [14370, 1.2, IO], [14750, .1]], r: [[14230, 0, LIN], [14750, 60]] } }),
+      spr('landing glow (light spreads over the tray)', 'glow-gold.jpg', BASE_PT[0], BASE_PT[1] - 150, 1000, 330, { ...light, a: { op: [[0, 0], [LAND - 80, 0], [LAND + 60, .7], [LAND + 750, 0]], s: [[LAND - 80, .5, OUT], [LAND + 750, 1.15]] } }),
+      spr('last glint', 'spark.jpg', BASE_PT[0] + 150, BASE_PT[1] - 250, 420, 420, { ...light, a: { op: [[0, 0], [14230, 0, OUT], [14370, 1, IO], [14750, 0]], s: [[14230, .2, OUT], [14370, 1.2, IO], [14750, .1]], r: [[14230, 0, LIN], [14750, 60]] } }),
+    ]),
   ], { from: 9000 }),
   E('g', 'logo-reveal', { a: { op: [[0, 0], [10300, 0, OUT], [10900, 1, LIN], [13700, 1, IO], [14150, 0]], o: [[10300, [0, 18], OUT], [10900, [0, 0]]] }, kids: [E('image', 'logo', { o: [HX, 142], shape: img(C.logo, 300, 100, 'xMinYMid meet') })] }),
 ] });
