@@ -5,8 +5,8 @@ const SET = process.argv[2] || 'set1', CONTENT = require('./content-market' + SE
 const BASE = 'https://cdn.jsdelivr.net/gh/nika619/conjure-svgator@main/assets/';
 const W = 1920, H = 1080, DUR = 15000, P = [960, 540];
 const TRAY0 = [948, 678], DX = 400, TRAY = [TRAY0[0] + DX, TRAY0[1]], F1 = [1260, 585], MK = f => 'market/' + f; // seller is placed so the tray sits right of the text card
-// on the tray floor, in seller-plate pixels: where the product touches the tray (bottom centre of its box) and its box
-const BASE_PT = [950, 818], PBOX = [860, 380], PC = [BASE_PT[0] + DX, 640] /* product centre in the scene */, LAND = 9500 /* the product touches the tray */;
+// on the tray floor, in seller-plate pixels: where the product touches the tray (bottom centre of its box), its box, and where the label card stands (front right)
+const BASE_PT = [950, 818], PBOX = [860, 380], TAG = [1252, 798], PC = [BASE_PT[0] + DX, 640] /* product centre in the scene */, LAND = 9500 /* the product touches the tray */;
 const cb = (a, b, c, d) => ({ type: 'cubic-bezier', value: { from: { x: a, y: b }, to: { x: c, y: d } } });
 const LIN = { type: 'linear', value: null };
 const IO = cb(.45, 0, .55, 1), OUT = cb(.16, 1, .3, 1), IN = cb(.7, 0, .84, 0), BACK = cb(.34, 1.56, .64, 1), SOFT = cb(.3, 0, .15, 1);
@@ -196,6 +196,27 @@ const images = E('g', 'EDIT ME 2 - images: product-image, logo', { kids: [
   E('g', 'logo-reveal', { a: { op: [[0, 0], [10300, 0, OUT], [10900, 1, LIN], [13700, 1, IO], [14150, 0]], o: [[10300, [0, 18], OUT], [10900, [0, 0]]] }, kids: [E('image', 'logo', { o: [HX, 142], shape: img(C.logo, 300, 100, 'xMinYMid meet') })] }),
 ] });
 
+// ---------------- EDIT ME 3: the label card that hops onto the tray and says what the product is ----------------
+const TW = 320, TH = 126, TX = TAG[0] - TW / 2, TY = TAG[1] - TH, J = 10000, KRAFT = [214, 183, 138], INK = [62, 38, 22];
+const label = E('g', 'EDIT ME 3 - label: label-title, label-detail', { kids: [
+  layer('label (rides the scene camera)', 1, [
+    breathe('label on the tray (moves with the seller)', [
+      spr('label shadow', MK('shadow.png'), TAG[0] + 8, TAG[1] - 6, 310, 48, { a: { op: [[0, 0], [J - 1, 0], [J, .15], [J + 330, .1], [J + 520, .45], [12820, .45], [12990, .22], [13120, .45], ...fadeOut(.45)], s: [[J, [.5, 1], OUT], [J + 520, [1, 1]]] } }),
+      piv('label-jump (hops onto the tray, hops again later)', TAG, { a: {
+        o: [[J, TAG, OUT], [J + 330, [TAG[0], TAG[1] - 90], IN], [J + 520, TAG, LIN], [12820, TAG, OUT], [12990, [TAG[0], TAG[1] - 34], IN], [13120, TAG]],
+        s: [[J, [.7, .15], OUT], [J + 170, [.9, 1.16], OUT], [J + 330, [1, 1], IN], [J + 520, [1.1, .86], OUT], [J + 690, [.97, 1.04], IO], [J + 860, [1, 1], LIN], [12700, [1, 1], OUT], [12820, [1.06, .92], OUT], [12900, [.97, 1.05], IO], [12990, [1, 1], IN], [13120, [1.05, .94], OUT], [13280, [1, 1]]],
+        r: [[J, -10, OUT], [J + 330, 4, IN], [J + 520, -3, OUT], [J + 860, -2, LIN], [12820, -2, OUT], [12990, 2, IN], [13120, -2]],
+        op: [[0, 0], [J - 1, 0], [J, 1], ...fadeOut(1)] }, kids: [
+        rect('label-card (kraft)', TX, TY, TW, TH, { rx: 14, fill: col(KRAFT), stroke: { paint: col([150, 110, 68]), width: 1.5, opacity: 1 } }),
+        rect('label-stitch', TX + 8, TY + 8, TW - 16, TH - 16, { rx: 9, fill: { type: 'none' }, stroke: { paint: col([120, 84, 50]), width: 1.2, dashArray: [5, 5], opacity: .55 } }),
+        rect('label-rule (accent colour)', TX + 26, TY + 70, 46, 3, { fill: col(ACC) }),
+        E('g', 'label-title-pop', { a: { op: [[0, 0], [J + 380, 0], [J + 560, 1]], o: [[J + 380, [0, 18], BACK], [J + 640, [0, 0]]] }, kids: [txt('label-title (max 12 chars)', C.label, TX + 24, TY + 56, 'Fraunces', 38, 600, { italic: true, color: INK })] }),
+        E('g', 'label-detail-pop', { a: { op: [[0, 0], [J + 500, 0], [J + 680, 1]], o: [[J + 500, [0, 14], BACK], [J + 760, [0, 0]]] }, kids: [txt('label-detail (max 22 chars)', C.labelDetail, TX + 26, TY + 101, 'DM Sans', 18, 600, { color: [112, 78, 46], ls: .5 })] }),
+      ] }),
+    ]),
+  ], { from: 9000 }),
+] });
+
 // ---------------- finishing layer ----------------
 const grade = E('g', 'finish: flash, vignette, letterbox', { kids: [
   rect('flash (hides the cuts)', 0, 0, W, H, { fill: col(WHITEGOLD), a: { op: [[0, 0], [2760, 0, IN], [3000, .85, OUT], [3500, 0, LIN], [6090, 0, IN], [6200, .55, OUT], [6500, 0, LIN], [8700, 0, IN], [9000, 1, cb(.2, .6, .3, 1)], [9600, 0]] } }),
@@ -204,7 +225,7 @@ const grade = E('g', 'finish: flash, vignette, letterbox', { kids: [
 ] });
 
 const doc = { id: 'svg-market', type: 'svg', animation: { duration: DUR, direction: 1, iterations: 0, fill: 1, alternate: false, speed: 1 },
-  properties: { shape: { position: { x: 0, y: 0 }, size: { width: W, height: H }, bgColor: col([0, 0, 0]) } }, children: [shot1, scene, shot3, text, brand, images, grade] };
+  properties: { shape: { position: { x: 0, y: 0 }, size: { width: W, height: H }, bgColor: col([0, 0, 0]) } }, children: [shot1, scene, shot3, text, brand, images, label, grade] };
 
 // self-check: the stall plate must always cover the frame, and every key must sit inside the timeline in order
 (function check() {
