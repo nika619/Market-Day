@@ -1,0 +1,3 @@
+# rendered frames, previews and generated bundles stay local
+*.png.tmp
+node_modules/
