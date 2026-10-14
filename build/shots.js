@@ -8,5 +8,5 @@ const url = 'file:///' + path.join(__dirname, process.env.PAGE || 'preview.html'
 let next = 0, done = 0;
 function run(w) { if (next >= times.length) return; const i = next++, t = times[i];
   const f = path.join(out, (spec.startsWith('fps:') ? 'f_' + String(i).padStart(4, '0') : 't_' + String(t).padStart(5, '0')) + '.png');
-  execFile(edge, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=' + (width / 1920), '--window-size=1920,1080', '--virtual-time-budget=8000', '--allow-file-access-from-files', '--user-data-dir=' + path.join(process.env.TEMP, 'claude', 'edgeprof' + w), '--screenshot=' + f, url + '#' + t], () => { if (++done === times.length) console.log('shots', done); run(w); }); }
+  execFile(edge, ['--headless=new', '--disable-gpu', ...(process.env.TRANSPARENT ? ['--default-background-color=00000000'] : []), '--hide-scrollbars', '--force-device-scale-factor=' + (width / 1920), '--window-size=1920,1080', '--virtual-time-budget=8000', '--allow-file-access-from-files', '--user-data-dir=' + path.join(process.env.TEMP, 'claude', 'edgeprof' + w), '--screenshot=' + f, url + '#' + t], () => { if (++done === times.length) console.log('shots', done); run(w); }); }
 for (let w = 0; w < +workers; w++) run(w);
