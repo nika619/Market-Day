@@ -138,7 +138,7 @@ const shot3 = E('g', 'shot-3 the presentation', { a: { op: [[0, 0], [6199, 0], [
 const C = CONTENT, ACC = C.accent || GOLD, HX = 112, HY = 372, FS = 92, CARD = [60, 104, 682, 756];
 const txt = (title, text, x, y, font, size, weight, o = {}) => E('text', title, { o: [x, y], shape: { text, rangeStyles: o.ranges || [], fontFamily: font, fontSize: size, fontStyle: { bold: false, italic: !!o.italic, weight }, letterSpacing: o.ls || 0, textAnchor: 'start' }, fill: col(o.color || CREAM), ...(o.a ? { a: o.a } : {}) });
 const hl = C.headline, lines = hl.split('\n'), accentFrom = hl.length - lines[lines.length - 1].length;
-const CTAW = 170 + C.cta.length * 19, CPER = 2 * (CTAW - 72) + Math.PI * 72;
+const CTAW = 322 /* fixed pill: fits up to 9 characters, the same box for every brand */, CPER = 2 * (CTAW - 72) + Math.PI * 72;
 const text = E('g', 'EDIT ME 1 - text: headline, subline, cta-text', { a: { op: [[0, 0], [10200, 0], [10201, 1], [13700, 1, IO], [14150, 0]] }, kids: [
   E('g', 'glass-card (frosted panel: a blurred copy of the scene behind it)', { a: { op: [[10200, 0], [10900, 1]] }, kids: [
     E('g', 'glass backdrop', { clip: 'c-card', kids: [
@@ -160,7 +160,7 @@ const text = E('g', 'EDIT ME 1 - text: headline, subline, cta-text', { a: { op: 
     rect('cta-glass', HX, 736, CTAW, 72, { rx: 36, fill: col([255, 255, 255], .09), a: { op: [[10200, 0], [11900, 0], [12350, 1]] } }),
     rect('cta-outline (draws itself)', HX, 736, CTAW, 72, { rx: 36, fill: { type: 'none' }, stroke: { paint: col(ACC), width: 2, dashArray: [f1(CPER)], dashOffset: f1(CPER), lineCap: 'round', opacity: 1 }, a: { dash: [[11600, CPER, cb(.5, 0, .2, 1)], [12350, 0]] } }),
     E('g', 'cta-text-reveal', { a: { op: [[10200, 0], [11900, 0, OUT], [12350, 1]] }, kids: [
-      txt('cta-text (max 12 chars)', C.cta, HX + 40, 781, 'DM Sans', 24, 700, { ls: 3 }),
+      txt('cta-text (max 9 chars)', C.cta, HX + 40, 781, 'DM Sans', 24, 700, { ls: 3 }),
       E('g', 'cta-arrow', { a: { o: [[11900, [-14, 0], OUT], [12400, [0, 0]]] }, kids: [E('path', 'arrow', { shape: { path: [[CTAW - 74, 772], [CTAW - 38, 772], [CTAW - 48, 762], [CTAW - 38, 772], [CTAW - 48, 782]].map(([x, y]) => ({ x: HX + x, y, type: 'corner', mode: 0 })) }, fill: { type: 'none' }, stroke: { paint: col(CREAM), width: 2, lineCap: 'round', lineJoin: 'round', opacity: 1 } })] }),
     ] }),
   ] }),
