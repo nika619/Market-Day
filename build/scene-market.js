@@ -68,7 +68,7 @@ const osc = (t0, t1, period, a, b, e = LIN) => { const out = []; for (let t = t0
 const light = { blend: 'screen' };
 
 // ---------------- camera for the scene: [time, zoom, scene point, where it sits on screen, easing to the next key, roll in degrees] ----------------
-const MIDP = [PC[0], 560];
+const MIDP = [TRAY[0] + 5, 560]; // the pull-back centres on the tray
 const MIDA = MIDP; // at zoom 1.0 the scene sits where it was composed, so the whole tray fits; the slow push starts from here without a jump
 const CAM = [
   [3000, 1.55, [760, 300], [960, 520], cb(.25, .1, .25, 1), -1.4],
