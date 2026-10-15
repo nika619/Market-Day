@@ -1,4 +1,4 @@
-// Market Day — builds the SVGator project document (market.json) for create_project and for the local previewer. Same engine as scene.js, market art.
+// Market Day — builds the SVGator project document (market.json) to import into SVGator and for the local previewer. Same engine as scene.js, market art.
 // Rule kept everywhere: motion lives on wrapper groups, never on the text or on the swappable images themselves.
 const fs = require('fs'), path = require('path');
 const SET = process.argv[2] || 'set1', CONTENT = require('./content-market' + SET.slice(3) + '.js'); // set1 candles, set2 mugs, set3 pizza

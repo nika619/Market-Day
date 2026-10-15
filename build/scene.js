@@ -1,4 +1,4 @@
-// Conjure v3 — builds the SVGator project document (conjure.json) for create_project and for the local previewer.
+// Conjure v3 — builds the SVGator project document (conjure.json) to import into SVGator and for the local previewer.
 // Rule kept everywhere: motion lives on wrapper groups, never on the text or on the swappable images themselves.
 const fs = require('fs'), path = require('path');
 const CONTENT = process.argv[2] === 'set2' ? require('./content2.js') : require('./content1.js');

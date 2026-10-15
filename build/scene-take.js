@@ -1,4 +1,4 @@
-// Market Day "one take" — builds the SVGator project document (take.json) for create_project and the local previewer.
+// Market Day "one take" — builds the SVGator project document (take.json) to import into SVGator and for the local previewer.
 // The film is one continuous live-action take (three chained 4K clips) stored as 360 frames at 24 fps, one image layer each.
 // Rule kept everywhere: motion lives on wrapper groups, never on the text or on the swappable images themselves.
 const fs = require('fs'), path = require('path');
