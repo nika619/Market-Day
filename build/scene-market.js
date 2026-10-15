@@ -99,7 +99,6 @@ const shot1 = E('g', 'shot-1 the counter (macro close-up)', { a: { op: [[0, 1], 
   ] }),
   spr('lens-streak', 'streak.jpg', 900, 150, 2600, 170, { ...light, a: { op: [[0, 0], [2000, 0, OUT], [2160, .8, IO], [2700, 0]], s: [[2000, [.2, 1], OUT], [2200, [1, 1], IO], [2700, [1.25, .5]]] } }),
   ...dustA,
-  rect('fade from black', 0, 0, W, H, { fill: col([0, 0, 0]), a: { op: [[0, 1], [220, 1, cb(.3, 0, .3, 1)], [1500, 0]] } }),
   spr('light burst', 'glow.jpg', F1[0], F1[1] - 100, 700, 700, { ...light, a: { op: [[0, 0], [2620, 0, IN], [3000, 1]], s: [[2620, .2, IN], [3000, 7]] } }),
 ] });
 
