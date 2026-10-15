@@ -11,7 +11,7 @@ REC = os.path.join(os.environ['TEMP'], 'rec', 'editor-new-1.mp4')
 EDIT = [(9.9, 11.9, 1), (44.0, 58.4, 4), (58.6, 60.0, 1)]  # (start, end, speed) in the take: pizza lands + label hops, label retyped (4x), "Diavola" hops
 RW, RH = 1248, 648                                          # take cropped above the Windows toast that covers its lower right
 WX, WY, WW = 920, 600, 2800; WH = round(WW * RH / RW)       # the editor window in the 4K frame (clear of the caption card, top left)
-FOCUS = (1000, 380)                                         # just above-left of the label card in take pixels, so the zoom keeps the timeline ruler out
+FOCUS = (1248, 355)                                         # zoom target in take pixels: right edge (whole headline card + label in view), timeline ruler (y > 568) out
 
 def ff(*a): subprocess.run(['ffmpeg', '-v', 'error', '-y', *a], check=True)
 def fresh(d): shutil.rmtree(d, ignore_errors=True); os.makedirs(d); return d
@@ -29,7 +29,7 @@ def editor_frames():
     bg.paste((0, 0, 0), (0, 0), sh.filter(ImageFilter.GaussianBlur(70)))
     mask = Image.new('L', (WW, WH), 0); ImageDraw.Draw(mask).rounded_rectangle((0, 0, WW - 1, WH - 1), 30, fill=255)
     for i, (f, k) in enumerate(frames):
-        u = min(1, max(0, (i - 60) / 18)); u = u * u * (3 - 2 * u); z = 1 + .7 * u  # zoom in on the label over the first 18 frames of the retype
+        u = min(1, max(0, (i - 60) / 18)); u = u * u * (3 - 2 * u); z = 1 + .52 * u  # zoom in on the label over the first 18 frames of the retype
         cw, ch = RW / z, RH / z
         cx = min(max(RW / 2 + (FOCUS[0] - RW / 2) * u, cw / 2), RW - cw / 2); cy = min(max(RH / 2 + (FOCUS[1] - RH / 2) * u, ch / 2), RH - ch / 2)
         win = Image.open(f).convert('RGB').resize((WW, WH), Image.LANCZOS, box=(cx - cw / 2, cy - ch / 2, cx + cw / 2, cy + ch / 2))
