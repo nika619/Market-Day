@@ -2,7 +2,7 @@
 // Rule kept everywhere: motion lives on wrapper groups, never on the text or on the swappable images themselves.
 const fs = require('fs'), path = require('path');
 const SET = process.argv[2] || 'set1', CONTENT = require('./content-market' + SET.slice(3) + '.js'); // set1 candles, set2 mugs, set3 pizza
-const BASE = 'https://cdn.jsdelivr.net/gh/nika619/conjure-svgator@main/assets/';
+const BASE = 'https://raw.githubusercontent.com/nika619/conjure-svgator/9e138705641155b67dfa629edd44a8fe1aa55e59/assets/'; // pinned commit: the pictures never change under a published template (jsDelivr failed to fetch this repo on Oct 15)
 const W = 1920, H = 1080, DUR = 15000, P = [960, 540];
 const TRAY0 = [948, 678], DX = 400, TRAY = [TRAY0[0] + DX, TRAY0[1]], F1 = [1260, 585], MK = f => 'market/' + f; // seller is placed so the tray sits right of the text card
 // on the tray floor, in seller-plate pixels: where the product touches the tray (bottom centre of its box), its box, and where the label card stands (front right)

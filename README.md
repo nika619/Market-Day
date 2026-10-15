@@ -25,8 +25,8 @@ Motion lives on wrapper groups, never on the text or on the swappable images, so
 
 ## What is in this repository
 
-- `assets/` — every picture the SVGator projects load. They are linked, not embedded, and served by jsDelivr:
-  `https://cdn.jsdelivr.net/gh/nika619/conjure-svgator@main/assets/<file>`.
+- `assets/` — every picture the SVGator projects load. They are linked, not embedded, and served straight from GitHub at a pinned commit,
+  so a published template never changes: `https://raw.githubusercontent.com/nika619/conjure-svgator/9e138705641155b67dfa629edd44a8fe1aa55e59/assets/<file>`.
   - `assets/market/` — Market Day: stall plate, seller cut-out, presentation frames, sprites, demo products and logos.
   - the files at the root of `assets/` — shared light sprites (glow, spark, streak, vignette) and the art of *Conjure*, an earlier fantasy concept kept for reference.
 - `build/` — the code that writes the SVGator project documents and checks them:
