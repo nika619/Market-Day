@@ -1,4 +1,4 @@
-// prints the layer updates (element path + new value) that bring a live SVGator project up to the local build (product on the tray + label card)
+// one-off for the Oct 15 product/label update: prints the layer updates (element path + new value) that bring a live SVGator project up to the local build. Its id checks assume the build from before the opening fade-in was removed.
 const set = process.argv[2] || 'set1', doc = require('./' + (set === 'set1' ? 'market' : 'market-' + set) + '.json');
 const find = (e, f) => f(e) ? e : (e.children || []).reduce((r, c) => r || find(c, f), null);
 const byTitle = t => find(doc, e => e.title === t);
