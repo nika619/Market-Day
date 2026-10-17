@@ -1,5 +1,5 @@
 // Fast frame renderer: one headless Edge page, art loaded once, then seek(t) + screenshot per frame over the DevTools protocol.
-// node cdp-shots.js <scene> <outDir> <fps> <durationSec> [width=1920] [tabs=3] [format=png|jpeg]
+// node cdp-shots.js <scene> <outDir> <fps> <durationSec> [width=1920] [tabs=3] [format=png|jpeg]   (START=ms offsets the first frame)
 const { spawn } = require('child_process'), fs = require('fs'), path = require('path'), os = require('os');
 const [scene, outDir, fps = 30, dur = 23, width = 1920, tabs = 3, fmt = 'png'] = process.argv.slice(2);
 const edge = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', PORT = 9300 + Math.floor(Math.random() * 500);
@@ -30,7 +30,7 @@ function client(wsUrl) {
       await c.send('Runtime.evaluate', { expression: "Promise.all([...document.querySelectorAll('image')].map(im=>new Promise(res=>{const i=new Image();i.onload=i.onerror=res;i.src=im.getAttribute('href');})))", awaitPromise: true });
       console.log('ready', w); await sleep(800);
       while (frames.length) {
-        const i = frames.shift(), tms = Math.round(i * 1000 / fps);
+        const i = frames.shift(), tms = Math.round(+(process.env.START || 0) + i * 1000 / fps);
         await c.send('Runtime.evaluate', { expression: `seek(${tms})` });
         const s = await c.send('Page.captureScreenshot', { format: fmt, ...(fmt === 'jpeg' ? { quality: 94 } : {}), captureBeyondViewport: false });
         fs.writeFileSync(path.join(out, 'f_' + String(i).padStart(4, '0') + (fmt === 'jpeg' ? '.jpg' : '.png')), Buffer.from(s.result.data, 'base64')); if (i % 30 === 0) console.log('frame', i);
