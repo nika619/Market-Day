@@ -72,7 +72,7 @@ const light = { blend: 'screen' };
 const L = (shot, name) => { const l = MAN[shot] && MAN[shot].layers[name]; if (!l) throw new Error('missing layer ' + shot + '/' + name); return l; };
 const A = (shot, name) => { const a = MAN[shot] && MAN[shot].anchors[name]; if (!a) throw new Error('missing anchor ' + shot + '/' + name); return a; };
 const plate = (shot, name, title, o = {}) => { const l = L(shot, name); return E('image', title || name, { o: [l.x, l.y], shape: img(l.file, l.w, l.h), ...o }); };
-const visible = (t0, t1, fade = 0) => fade ? [[0, 0], [t0 - fade, 0], [t0, 1], [t1, 1], [t1 + fade, 0]] : [[0, 0], [t0 - 1, 0], [t0, 1], [t1, 1], [t1 + 1, 0]];
+const visible = (t0, t1, fade = 0) => t0 <= 0 ? [[0, 1], [t1, 1], [t1 + 1, 0]] : fade ? [[0, 0], [t0 - fade, 0], [t0, 1], [t1, 1], [t1 + fade, 0]] : [[0, 0], [t0 - 1, 0], [t0, 1], [t1, 1], [t1 + 1, 0]];
 const txt = (title, text, x, y, font, size, weight, o = {}) => E('text', title, { o: [x, y], shape: { text, rangeStyles: o.ranges || [], fontFamily: font, fontSize: size, fontStyle: { bold: false, italic: !!o.italic, weight }, letterSpacing: o.ls || 0, textAnchor: o.anchor || 'start' }, fill: col(o.color || [255, 246, 230]), ...(o.a ? { a: o.a } : {}), ...(o.filter ? { filter: o.filter } : {}) });
 const blur = v => [{ type: 'blur', value: { x: v, y: v } }];
 
@@ -136,7 +136,7 @@ const s2 = G('S2 moon crossing (long lens)', [
     glow('moon halo', MOONC[0], MOONC[1], MOOND * 2.4, MOOND * 2.4, [[0, .55]]),
     spr('moon', L('MOON', 'moon').file, MOONC[0], MOONC[1], MOOND, MOOND),
   ] }),
-  piv('team crossing (silhouette)', P, { a: { o: [[3300, [-520, 640], SOFT], [5550, [1720, 370]]], s: [[3300, .5, LIN], [5550, .44]], r: [[3300, -9, SOFT], [5550, -4]] }, kids: [
+  piv('team crossing (silhouette)', P, { a: { o: [[3300, [-560, 650], SOFT], [5600, [2500, 290]]], s: [[3300, .5, LIN], [5550, .44]], r: [[3300, -9, SOFT], [5550, -4]] }, kids: [
     E('g', 'silhouette', { id: 'p-s2team', filter: [{ type: 'brightness', value: 0 }], kids: [teamRig('team (silhouette)', { t0: 3200, t1: 5950, period: 380, bells: false })] }),
   ] }),
   ...Array.from({ length: 14 }, (_, i) => { const t = 3450 + i * 150, x = -380 + (t - 3300) / 2250 * 2240 - 220, y = 690 - (t - 3300) / 2250 * 270; return sparkle(x, y, R(18, 42), t, R(700, 1100), R(-90, -30), R(20, 70)); }),
@@ -146,15 +146,15 @@ const s2 = G('S2 moon crossing (long lens)', [
 const PANO = 'PANO', T0 = 5900, T1 = 9500;
 const panoLayer = (name, d, scroll) => piv('pano ' + name, P, { a: { o: [[T0, [P[0] + 260 * d, P[1]], GLIDE], [T1, [P[0] - scroll, P[1]]]] }, kids: [plate(PANO, name)] });
 const s4 = G('S4 the team (tracking over the town)', [
-  piv('whip-in (pan blur)', P, { a: { o: [[5900, [1500, 540], OUT], [6250, [960, 540]]], f: [[5900, blur(26)], [6150, blur(6)], [6300, blur(0)]] }, kids: [
+  piv('whip-in (pan blur)', P, { a: { o: [[5750, [1700, 540], OUT], [6150, [960, 540]]], f: [[5750, blur(30)], [6000, blur(8)], [6150, blur(0)]] }, kids: [
     piv('s4-camera (bank + push)', P, { a: { r: [[T0, -2.5, PREM], [8000, 1.2, PREM], [T1, -0.6]], s: [[T0, 1.0, GLIDE], [9200, 1.08, IN], [T1, 1.7]], o: [[T0, P, GLIDE], [9200, [P[0], P[1] - 10], IN], [T1, [P[0] + 300, P[1] + 140]]] }, kids: [
       panoLayer('sky', .05, 60), panoLayer('far', .45, 520), panoLayer('mid', 1, 1500),
       piv('team (hero)', A('TEAM', 'team_center'), { a: { o: [[T0, [A('TEAM', 'team_center')[0] + 40, A('TEAM', 'team_center')[1] + 60], PREM], [T1, [A('TEAM', 'team_center')[0] - 20, A('TEAM', 'team_center')[1] - 30]]], s: [[T0, 1.12, LIN], [T1, 1.18]] }, kids: [E('g', 'team rig', { id: 'p-s4team', kids: [teamRig('team', { t0: 5900, t1: 9600, period: 420 })] })] }),
       ...Array.from({ length: 18 }, (_, i) => { const t = 6000 + i * 190, sl = L('TEAM', 'sleigh-santa'); return sparkle(sl.x + 40, sl.y + sl.h * .55 + R(-30, 30), R(16, 38), t, R(800, 1200), R(-420, -260), R(30, 120)); }),
     ] }),
   ] }),
-  ...Array.from({ length: 10 }, () => { const y = R(0, 1080); return spr('speed line', 'streak.jpg', 960, y, 2400, R(30, 70), { ...light, a: { op: [[0, 0], [5880, 0], [5950, R(.2, .45)], [6250, 0]], o: [[5880, [2400, y], OUT], [6250, [-600, y]]] } }); }),
-], { id: 'p-s4', a: { op: visible(5900, 9500) } });
+  ...Array.from({ length: 10 }, () => { const y = R(0, 1080); return spr('speed line', 'streak.jpg', 960, y, 2400, R(30, 70), { ...light, a: { op: [[0, 0], [5700, 0], [5800, R(.2, .45)], [6150, 0]], o: [[5700, [2400, y], OUT], [6150, [-600, y]]] } }); }),
+], { id: 'p-s4', a: { op: visible(5750, 9500) } });
 const whipOut = piv('S2 whip-out wrapper', P, { id: 'p-s2', a: { o: [[5650, P, WHIP], [5950, [-700, 540]]], f: [[5650, blur(0)], [5800, blur(24)], [5950, blur(40)]] }, kids: [s2] });
 
 // ---------------- S5 the Nice List (9500-12300) ----------------
@@ -204,7 +204,6 @@ const s6 = G('S6 the drop (rooftop)', [
 const MP = L(S6, 'mouth');
 const s7 = G('S7 down the chimney', [
   piv('flue push', P, { a: { s: [[14950, 1.0, IN], [15600, 2.6]] }, kids: [E('image', 'mouth (looking down the flue)', { o: [MP.x, MP.y], shape: img(MP.file, MP.w, MP.h) })] }),
-  rect('firelight fills the frame', 0, 0, W, H, { fill: col([255, 150, 70]), a: { op: [[0, 0], [15250, 0], [15600, 1], [15700, 1], [16050, 0]] } }),
 ], { a: { op: [[0, 0], [14949, 0], [15050, 1], [15700, 1], [15701, 0]] } });
 
 // ---------------- S8-S10 the room (15600-23000) ----------------
@@ -295,6 +294,10 @@ const flake = (depth) => { const big = depth === 2, z = big ? R(14, 26) : depth 
 const snow = G('snow (exterior)', [G('far flakes', Array.from({ length: 30 }, () => flake(0))), G('mid flakes', Array.from({ length: 16 }, () => flake(1))), G('near flakes (soft)', Array.from({ length: 5 }, () => flake(2)))], { id: 'p-snow', a: { op: [[0, 1], [15100, 1], [15350, 0]] } });
 
 // ---------------- finish ----------------
+const bridge = G('chimney to fireplace: firelight bloom', [
+  rect('warm wash', 0, 0, W, H, { fill: col([255, 140, 60]), a: { op: [[0, 0], [15200, 0], [15580, .5], [15720, .42], [16100, 0]] } }),
+  spr('fire bloom', 'glow-gold.jpg', 960, 560, 2900, 2400, { ...light, a: { op: [[0, 0], [15150, 0], [15560, 1], [15800, .75], [16250, 0]], s: [[15150, .35, IN], [15600, 1.05, OUT], [16250, 1.25]] } }),
+]);
 const finish = G('finish: vignette, letterbox', [
   E('image', 'vignette', { shape: img('vignette.png', W, H), op: .85 }),
   rect('letterbox-top (delete both bars for a full frame)', 0, 0, W, 64, { fill: col([0, 0, 0]) }), rect('letterbox-bottom', 0, H - 64, W, 64, { fill: col([0, 0, 0]) }),
@@ -303,7 +306,7 @@ const readme = G('README (outside the canvas: how to make it yours)', [txt('read
 
 const doc = { id: 'svg-delivery', type: 'svg', animation: { duration: DUR, direction: 1, iterations: 1, fill: 1, alternate: false, speed: 1 },
   properties: { shape: { position: { x: 0, y: 0 }, size: { width: W, height: H }, bgColor: col([4, 6, 14]) } },
-  children: [s1, title1, whipOut, s4, s5, s6, s7, s8, endText, snow, finish, readme] };
+  children: [s1, title1, whipOut, s4, s5, s6, s7, s8, bridge, endText, snow, finish, readme] };
 
 (function check() {
   let n = 0, keysN = 0, imgs = new Set();
@@ -312,7 +315,7 @@ const doc = { id: 'svg-delivery', type: 'svg', animation: { duration: DUR, direc
     (e.children || []).forEach(walk); })(doc);
   console.log('elements', n, 'keyframes', keysN, 'images', imgs.size);
 })();
-const out = SET === 'set1' ? 'delivery' : 'delivery-' + SET;
+const out = process.env.OUTNAME || (SET === 'set1' ? 'delivery' : 'delivery-' + SET);
 // upload chunks: the base document with placeholders, then each big piece as an edit_part update of its placeholder (parents first)
 const SPLIT = ['p-s1', 'p-s2', 'p-s2team', 'p-s4', 'p-s4team', 'p-s6', 'p-s6team', 'p-snow'];
 const strip = (e, keep) => (SPLIT.includes(e.id) && e.id !== keep) ? { id: e.id, type: 'g', title: e.title } : { ...e, ...(e.children ? { children: e.children.map(c => strip(c, keep)) } : {}) };
