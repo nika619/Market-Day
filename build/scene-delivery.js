@@ -186,8 +186,9 @@ const SX = PX0 + PW / 2 + 74, SY = RODY + 414, STAMP = 12020;
 // the sway dies down before the joke is read
 const paper = piv('list sway (hangs from the rod)', [PX0 + PW / 2, RODY], { a: { r: [...osc(9500, 11200, 1400, -0.6, 0.45), [11600, 0, SOFT]] }, kids: [G('EDIT ME 2 - the Nice List (entries are live text; entry 4 = the tag recipient)', [
   E('g', 'paper (unrolls)', { mask: 'm-paper', kids: [
-    E('mask', 'unroll mask', { id: 'm-paper', kids: [rect('reveal', PX0 - 10, RODY, PW + 20, 10, { fill: col([255, 255, 255]), a: { size: [[U0, [PW + 20, 1], cb(.35, 0, .25, 1)], [U1, [PW + 20, PH + 40]]] } })] }),
+    E('mask', 'unroll mask', { id: 'm-paper', kids: [rect('reveal', PX0 - 10, RODY, PW + 20, 10, { fill: col([255, 255, 255]), a: { size: [[U0, [PW + 20, 1], cb(.35, 0, .25, 1)], [U1, [PW + 20, PH + 58], cb(.3, 0, .4, 1)], [U1 + 220, [PW + 20, PH + 40]]] } })] }),
     E('image', 'parchment', { o: [PX0, RODY], shape: img('delivery/s5/paper.webp', PW, PH), filter: [{ type: 'drop-shadow', value: { blur: { x: 10, y: 10 }, offset: { x: 0, y: 8 }, color: { r: 20, g: 10, b: 4, a: .45 } } }] }),
+    rect('curl shade (rides the rolling edge)', PX0, RODY - 30, PW, 36, { fill: { type: 'linear-gradient', value: { from: { x: 0, y: 0 }, to: { x: 0, y: 1 }, stops: [{ offset: 0, color: { r: 60, g: 36, b: 16, a: 0 } }, { offset: 1, color: { r: 60, g: 36, b: 16, a: .38 } }], spread: 'pad', fixed: false } }, a: { o: [[U0, [PX0, RODY - 30], cb(.35, 0, .25, 1)], [U1, [PX0, RODY + PH - 12], cb(.3, 0, .4, 1)], [U1 + 220, [PX0, RODY + PH - 30]]], op: [[0, 0], [U0 - 1, 0], [U0, 1], [U1 + 60, 1], [U1 + 260, 0]] } }),
     txt('list-title', 'NICE LIST', PX0 + PW / 2, RODY + 58, 'Fraunces', 34, 700, { anchor: 'middle', color: RED, ls: 3 }),
     rect('list rule', PX0 + 40, RODY + 74, PW - 80, 2, { fill: col(RED, .6) }),
     ...entries.map((e, i) => G('entry ' + (i + 1) + (e.hero ? ' (the recipient: match the gift tag)' : ''), [
@@ -201,7 +202,7 @@ const paper = piv('list sway (hangs from the rod)', [PX0 + PW / 2, RODY], { a: {
       txt('stamp text', 'CHECKED TWICE', SX, SY + 7, 'DM Sans', 19, 700, { anchor: 'middle', color: RED, ls: 3 }),
     ] }),
   ] }),
-  rect('roll (the rolled-up paper)', PX0 - 6, RODY - 14, PW + 12, 28, { rx: 14, fill: { type: 'linear-gradient', value: { from: { x: 0, y: 0 }, to: { x: 0, y: 1 }, stops: [{ offset: 0, color: { r: 250, g: 240, b: 216, a: 1 } }, { offset: .55, color: { r: 214, g: 196, b: 158, a: 1 } }, { offset: 1, color: { r: 150, g: 128, b: 92, a: 1 } }] } }, a: { o: [[U0, [PX0 - 6, RODY - 14], cb(.35, 0, .25, 1)], [U1, [PX0 - 6, RODY + PH - 14]]], op: [[0, 1], [U1 - 1, 1], [U1 + 120, 0]] } }),
+  rect('roll (the rolled-up paper)', PX0 - 6, RODY - 14, PW + 12, 28, { rx: 14, fill: { type: 'linear-gradient', value: { from: { x: 0, y: 0 }, to: { x: 0, y: 1 }, stops: [{ offset: 0, color: { r: 250, g: 240, b: 216, a: 1 } }, { offset: .55, color: { r: 214, g: 196, b: 158, a: 1 } }, { offset: 1, color: { r: 150, g: 128, b: 92, a: 1 } }] } }, a: { o: [[U0, [PX0 - 6, RODY - 14], cb(.35, 0, .25, 1)], [U1, [PX0 - 6, RODY + PH + 4], cb(.3, 0, .4, 1)], [U1 + 220, [PX0 - 6, RODY + PH - 14]]], size: [[U0, [PW + 12, 28], cb(.35, 0, .25, 1)], [U1, [PW + 12, 15]]], op: [[0, 1], [U1 + 120, 1], [U1 + 260, 0]] } }),   // the roll thins as paper leaves it, overshoots and settles
 ])] });
 // in: S4's push carries on as a zoom out of blur; out: the stamp jolts the camera, then a whip-tilt up to the sky over the rooftop (S6 rides the same move)
 const S5P = [960, 470], WHIPV = [12240, 12520];
