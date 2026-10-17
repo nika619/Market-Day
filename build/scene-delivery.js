@@ -158,20 +158,40 @@ const s4 = G('S4 the team (tracking over the town)', [
 const whipOut = piv('S2 whip-out wrapper', P, { id: 'p-s2', a: { o: [[5650, P, WHIP], [5950, [-700, 540]]], f: [[5650, blur(0)], [5800, blur(24)], [5950, blur(40)]] }, kids: [s2] });
 
 // ---------------- S5 the Nice List (9500-12300) ----------------
-const S5 = 'S5', rl = A(S5, 'rod_l'), rr = A(S5, 'rod_r'), RODY = (rl[1] + rr[1]) / 2 + 12, PX0 = Math.min(rl[0], rr[0]) + 26, PX1 = Math.max(rl[0], rr[0]) - 26, PW = PX1 - PX0, PH = 470, U0 = 9900, U1 = 10700;
-const listLines = C.list.map((s, i) => ({ s, y: RODY + 104 + i * 54 + (i >= 4 ? 18 : 0) }));
-const paper = G('EDIT ME 2 - the Nice List (list lines are live text)', [
+const S5 = 'S5', rl = A(S5, 'rod_l'), rr = A(S5, 'rod_r'), RODY = (rl[1] + rr[1]) / 2 + 12, PX0 = Math.min(rl[0], rr[0]) + 26, PX1 = Math.max(rl[0], rr[0]) - 26, PW = PX1 - PX0, PH = 470, U0 = 9800, U1 = 10450;
+// the list is the setup, the gift tag is the payoff: entry 4 is the tag's recipient, circled, ticked and stamped
+const INK = [58, 40, 30], RED = [168, 40, 34], LX = PX0 + 62, LY = i => RODY + 122 + i * 50;
+const entries = [...C.list.map((s, i) => ({ lines: [s], y: LY(i), t: 10350 + i * 230 })), { lines: C.recipient, y: LY(3) + 12, t: 11060, hero: true }];
+const writeOn = (id, line, x, y, t, dur, o = {}) => G('write-on', [   // a pen wipe: the mask grows left to right, the text never moves
+  E('mask', 'pen wipe', { id, kids: [rect('wipe', x - 6, y - 28, 1, 38, { fill: col([255, 255, 255]), a: { size: [[t, [1, 38], SINE], [t + dur, [PX1 - x + 10, 38]]] } })] }),
+  txt(o.title || 'line (edit me)', line, x, y, 'Fraunces', 25, o.weight || 500, { italic: true, color: o.color || INK }),
+], { mask: id });
+const hero = entries[3], heroW = Math.max(...hero.lines.map(l => l.length)) * 13.2, CX = (PX0 + 6 + LX + heroW + 20) / 2, CY = hero.y + 8, CRX = (LX + heroW + 20 - PX0 - 6) / 2, CRY = 50;   // loops the whole entry, number included
+const inkLoop = (() => {   // hand-drawn loop: 1.1 turns of a wobbly ellipse, Catmull-Rom to bezier handles
+  const pts = Array.from({ length: 12 }, (_, i) => { const a = (-60 + i * 36) * Math.PI / 180, w = 1 + (i % 3 - 1) * .035; return [CX + Math.cos(a) * CRX * w, CY + Math.sin(a) * CRY * w + i * .6]; });
+  return pts.map(([x, y], i) => { const p0 = pts[Math.max(0, i - 1)], p2 = pts[Math.min(pts.length - 1, i + 1)], hx = (p2[0] - p0[0]) / 6, hy = (p2[1] - p0[1]) / 6;
+    return { x: r1(x), y: r1(y), type: 'cusp', mode: 0, ...(i ? { start: { x: r1(x - hx), y: r1(y - hy) } } : {}), ...(i < pts.length - 1 ? { end: { x: r1(x + hx), y: r1(y + hy) } } : {}) }; });
+})(), LOOPLEN = Math.round(Math.PI * (CRX + CRY) * 1.3);
+const SX = PX0 + PW / 2 + 74, SY = RODY + 414, STAMP = 12020;
+const paper = piv('list sway (hangs from the rod)', [PX0 + PW / 2, RODY], { a: { r: osc(9500, 12300, 2800, -0.5, 0.5) }, kids: [G('EDIT ME 2 - the Nice List (entries are live text; entry 4 = the tag recipient)', [
   E('g', 'paper (unrolls)', { mask: 'm-paper', kids: [
     E('mask', 'unroll mask', { id: 'm-paper', kids: [rect('reveal', PX0 - 10, RODY, PW + 20, 10, { fill: col([255, 255, 255]), a: { size: [[U0, [PW + 20, 1], cb(.35, 0, .25, 1)], [U1, [PW + 20, PH + 40]]] } })] }),
-    rect('paper', PX0, RODY, PW, PH, { rx: 6, fill: { type: 'linear-gradient', value: { from: { x: 0, y: 0 }, to: { x: 1, y: 0 }, stops: [{ offset: 0, color: { r: 226, g: 210, b: 176, a: 1 } }, { offset: .5, color: { r: 246, g: 236, b: 212, a: 1 } }, { offset: 1, color: { r: 222, g: 205, b: 170, a: 1 } }] } }, filter: [{ type: 'drop-shadow', value: { blur: { x: 10, y: 10 }, offset: { x: 0, y: 8 }, color: { r: 20, g: 10, b: 4, a: .45 } } }] }),
-    txt('list-title', 'NICE LIST', PX0 + PW / 2, RODY + 58, 'Fraunces', 34, 700, { anchor: 'middle', color: [168, 40, 34], ls: 3 }),
-    rect('list rule', PX0 + 40, RODY + 74, PW - 80, 2, { fill: col([168, 40, 34], .6) }),
-    ...listLines.map(({ s, y }, i) => G('list-line-' + (i + 1), [txt('list-line-' + (i + 1) + ' (edit me)', s, PX0 + 34, y, 'Fraunces', 25, i === 4 ? 700 : 500, { italic: true, color: [58, 40, 30] })],
-      { a: { op: [[0, 0], [10500 + i * 260, 0], [10700 + i * 260, 1]], o: [[10500 + i * 260, [10, 0], OUT], [10760 + i * 260, [0, 0]]] } })),
-    E('path', 'tick (draws itself)', { shape: { path: [{ x: PX1 - 74, y: listLines[4].y - 12, type: 'corner', mode: 0 }, { x: PX1 - 60, y: listLines[4].y + 2, type: 'corner', mode: 0 }, { x: PX1 - 32, y: listLines[4].y - 30, type: 'corner', mode: 0 }] }, fill: { type: 'none' }, stroke: { paint: col([46, 128, 74]), width: 6, lineCap: 'round', lineJoin: 'round', dashArray: [80], dashOffset: 80, opacity: 1 }, a: { dash: [[11650, 80, BACK], [11900, 0]] } }),
+    E('image', 'parchment', { o: [PX0, RODY], shape: img('delivery/s5/paper.webp', PW, PH), filter: [{ type: 'drop-shadow', value: { blur: { x: 10, y: 10 }, offset: { x: 0, y: 8 }, color: { r: 20, g: 10, b: 4, a: .45 } } }] }),
+    txt('list-title', 'NICE LIST', PX0 + PW / 2, RODY + 58, 'Fraunces', 34, 700, { anchor: 'middle', color: RED, ls: 3 }),
+    rect('list rule', PX0 + 40, RODY + 74, PW - 80, 2, { fill: col(RED, .6) }),
+    ...entries.map((e, i) => G('entry ' + (i + 1) + (e.hero ? ' (the recipient: match the gift tag)' : ''), [
+      piv('number', [PX0 + 40, e.y - 8], { a: { op: [[0, 0], [e.t - 120, 0], [e.t, 1]], s: [[e.t - 120, .6, BACK], [e.t + 80, 1]] }, kids: [txt('number', (i + 1) + '.', PX0 + 40, e.y, 'Fraunces', 22, 700, { anchor: 'middle', color: RED })] }),
+      ...e.lines.map((l, j) => writeOn(`m-entry${i + 1}${'ab'[j]}`, l, LX, e.y + j * 32, e.t + j * 230, e.hero ? 300 : 360, { title: `entry ${i + 1}${e.lines.length > 1 ? ' line ' + (j + 1) : ''} (edit me)`, weight: e.hero ? 700 : 500, color: e.hero ? [40, 26, 18] : INK })),
+    ])),
+    E('path', 'ink loop around the recipient', { shape: { path: inkLoop }, fill: { type: 'none' }, stroke: { paint: col(RED, .85), width: 3.2, lineCap: 'round', lineJoin: 'round', dashArray: [LOOPLEN], dashOffset: LOOPLEN, opacity: 1 }, a: { dash: [[11560, LOOPLEN, SOFT], [11900, 0]] } }),
+    E('path', 'tick (draws itself)', { shape: { path: [{ x: PX1 - 66, y: CY + 2, type: 'corner', mode: 0 }, { x: PX1 - 52, y: CY + 16, type: 'corner', mode: 0 }, { x: PX1 - 24, y: CY - 16, type: 'corner', mode: 0 }] }, fill: { type: 'none' }, stroke: { paint: col([46, 128, 74]), width: 6, lineCap: 'round', lineJoin: 'round', dashArray: [80], dashOffset: 80, opacity: 1 }, a: { dash: [[11860, 80, BACK], [12020, 0]] } }),
+    piv('stamp (slams down)', [SX, SY], { r: -8, op: 0, a: { op: [[0, 0], [STAMP, 0], [STAMP + 70, .9]], s: [[STAMP, 1.9, IN], [STAMP + 110, .94, OUT], [STAMP + 220, 1]] }, kids: [
+      rect('stamp border', SX - 118, SY - 24, 236, 48, { rx: 8, fill: { type: 'none' }, stroke: { paint: col(RED), width: 3, opacity: 1 } }),
+      txt('stamp text', 'CHECKED TWICE', SX, SY + 7, 'DM Sans', 19, 700, { anchor: 'middle', color: RED, ls: 3 }),
+    ] }),
   ] }),
   rect('roll (the rolled-up paper)', PX0 - 6, RODY - 14, PW + 12, 28, { rx: 14, fill: { type: 'linear-gradient', value: { from: { x: 0, y: 0 }, to: { x: 0, y: 1 }, stops: [{ offset: 0, color: { r: 250, g: 240, b: 216, a: 1 } }, { offset: .55, color: { r: 214, g: 196, b: 158, a: 1 } }, { offset: 1, color: { r: 150, g: 128, b: 92, a: 1 } }] } }, a: { o: [[U0, [PX0 - 6, RODY - 14], cb(.35, 0, .25, 1)], [U1, [PX0 - 6, RODY + PH - 14]]], op: [[0, 1], [U1 - 1, 1], [U1 + 120, 0]] } }),
-]);
+])] });
 const s5 = G('S5 the Nice List (medium close-up)', [
   piv('s5-camera (slow push)', [960, 560], { a: { s: [[9500, 1.0, GLIDE], [12300, 1.07]], o: [[9500, [960, 600], GLIDE], [12300, [960, 560]]] }, kids: [
     E('image', 'town bokeh', { o: [-700, -120], shape: img(L(PANO, 'far').file, 3400, 1300), filter: blur(14), op: .85 }),
