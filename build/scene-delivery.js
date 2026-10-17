@@ -285,7 +285,8 @@ const product = G('EDIT ME 1 - product-image (rises from the box)', [
 ]);
 // focus pull: as the camera pushes in on the gift the room behind (and the foreground) goes soft; the pull-back sharpens it, a touch soft behind the end card
 const FOCUS = (b, e) => [[17500, blur(0)], [18300, blur(b)], [20100, blur(b)], [20700, blur(e)]];
-const roomL = (n, kids = [], focus) => camLayer(n, KR, rl_(n), [plate(RM, n), ...kids], {}, focus);
+// the blur sits on the plate, not the layer group: a filtered group isolates its screen-blend glows (tree lights, flames) into dark boxes
+const roomL = (n, kids = [], focus) => camLayer(n, KR, rl_(n), [plate(RM, n, null, focus ? { a: { f: focus } } : {}), ...kids]);
 const RB = MAN.ANCH_ROOM.anchors;
 const s8 = G('S8-S10 the living room', [
   roomL('back', [], FOCUS(4, 2.5)),
