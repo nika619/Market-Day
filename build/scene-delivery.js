@@ -217,7 +217,7 @@ const TS = MAN.TUMBLE.layers, TN = 24, TW = 210, TH = TW * TS.tumble00.h / TS.tu
 const arcPt = u => { const a = [430, 330], b = [HOVER[0] - 40, HOVER[1] - 260], c = HOVER; return [(1 - u) ** 2 * a[0] + 2 * u * (1 - u) * b[0] + u * u * c[0], (1 - u) ** 2 * a[1] + 2 * u * (1 - u) * b[1] + u * u * c[1]]; };
 const giftPath = []; for (let k = 0; k <= 8; k++) { const u = k / 8, t = GT0 + (GT1 - GT0) * (1 - (1 - u) ** 1.6); giftPath.push([t, arcPt(u), LIN]); }
 const tumble = G('gift tumble (24-frame sequence)', Array.from({ length: TN }, (_, k) => { const keys = [[0, 0]]; for (let t = GT0, f = 0; t < GT1 + 300; t += 42, f++) if (f % TN === k) { keys.push([t, 0], [t + 1, 1], [t + 41, 1], [t + 42, 0]); } return spr('tumble ' + k, TS['tumble' + String(k).padStart(2, '0')].file, 0, 0, TW, TH, { a: { op: keys } }); }));
-const s6 = piv('S6 the drop (rooftop)', P, { id: 'p-s6', a: { op: [[0, 0], [WHIPV[0] - 1, 0], [WHIPV[0], 1], [15150, 1], [15250, 0]], o: [[WHIPV[0], [P[0], P[1] - H], WHIP], [WHIPV[1], P]], f: [[WHIPV[0], blur(30)], [12380, blur(26)], [WHIPV[1], blur(0)]] }, kids: [
+const s6 = piv('S6 the drop (rooftop)', P, { id: 'p-s6', a: { op: [[0, 0], [WHIPV[0] - 1, 0], [WHIPV[0], 1], [15150, 1], [15250, 0]], o: [[WHIPV[0], [P[0], P[1] - H], WHIP], [WHIPV[1], P]], f: [[WHIPV[0], blur(30)], [12380, blur(26)], [WHIPV[1], blur(0)], [14950, blur(0)], [15150, blur(16)]] }, kids: [   // the push into the chimney blurs into the flue cut
   camLayer('sky (+ stars)', K6, .06, [E('image', 'sky', { o: [L(S6, 'sky').x, L(S6, 'sky').y - 500], shape: img(L(S6, 'sky').file, L(S6, 'sky').w, L(S6, 'sky').h + 500) }), ...stars(30, 600, 12300, 15200)]),
   camLayer('moon', K6, depthFactor(S6, 'moon', F6), [(() => { const m = L(S6, 'moon'); return glow('moon glow', m.x + m.w / 2, m.y + m.h / 2, m.w * 2.8, m.h * 2.8, [[0, .5]]); })(), plate(S6, 'moon')]),
   piv('team swoops overhead', P, { a: { o: [[12300, [-360, 330], SOFT], [13250, [700, 150], SOFT], [14100, [2300, 260]]], s: [[12300, .38, LIN], [14100, .3]], r: [[12300, -6, SOFT], [13250, -12, SOFT], [14100, -2]] }, kids: [E('g', 'team rig', { id: 'p-s6team', kids: [teamRig('team (small)', { t0: 12300, t1: 14100, period: 360, bells: false, arm: { r: [[12300, 0, OUT], [12850, -38, SPRING], [13050, 62, OUT], [13400, 20, IO], [13800, 0]] } })] })] }),
@@ -235,7 +235,7 @@ const s6 = piv('S6 the drop (rooftop)', P, { id: 'p-s6', a: { op: [[0, 0], [WHIP
 const MP = L(S6, 'mouth');
 const s7 = G('S7 down the chimney', [
   piv('flue push', P, { a: { s: [[14950, 1.0, IN], [15600, 2.6]] }, kids: [E('image', 'mouth (looking down the flue)', { o: [MP.x, MP.y], shape: img(MP.file, MP.w, MP.h) })] }),
-], { a: { op: [[0, 0], [14949, 0], [15050, 1], [15700, 1], [15701, 0]] } });
+], { a: { op: [[0, 0], [15079, 0], [15140, 1], [15700, 1], [15701, 0]] } });   // a fast cut, not a dissolve: the top-down flue does not line up with the rooftop push
 
 // ---------------- S8-S10 the room (15600-23000) ----------------
 const RM = 'ROOM', GF = 'GIFT', FR = 2.75;
