@@ -2,7 +2,7 @@
 const { execFile } = require('child_process'), fs = require('fs'), path = require('path');
 const [scene, outDir, spec, workers = 6, width = 1920] = process.argv.slice(2);
 const edge = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
-const times = spec.startsWith('fps:') ? Array.from({ length: Math.round(15 * +spec.slice(4)) }, (_, i) => Math.round(i * 1000 / +spec.slice(4))) : spec.split(',').map(Number);
+const times = spec.startsWith('fps:') ? Array.from({ length: Math.round((+process.env.DUR || 15) * +spec.slice(4)) }, (_, i) => Math.round(i * 1000 / +spec.slice(4))) : spec.split(',').map(Number);
 const out = path.join(__dirname, outDir); fs.mkdirSync(out, { recursive: true });
 const url = 'file:///' + path.join(__dirname, process.env.PAGE || 'preview.html').split(path.sep).join('/') + '?s=' + scene;
 let next = 0, done = 0;

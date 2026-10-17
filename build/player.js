@@ -55,6 +55,7 @@
     while (fEl.firstChild) fEl.removeChild(fEl.firstChild);
     for (const it of list) {
       if (it.type === 'blur') mk('feGaussianBlur', fEl).setAttribute('stdDeviation', `${it.value.x},${it.value.y}`);
+      else if (it.type === 'drop-shadow') { const d = mk('feDropShadow', fEl), v = it.value; d.setAttribute('dx', v.offset.x); d.setAttribute('dy', v.offset.y); d.setAttribute('stdDeviation', `${v.blur.x / 2},${v.blur.y / 2}`); d.setAttribute('flood-color', `rgb(${v.color.r},${v.color.g},${v.color.b})`); d.setAttribute('flood-opacity', v.color.a); }
       else if (it.type === 'brightness') { const ct = mk('feComponentTransfer', fEl); for (const ch of 'RGB') { const fn = mk('feFunc' + ch, ct); fn.setAttribute('type', 'linear'); fn.setAttribute('slope', it.value); } }
     }
   }
