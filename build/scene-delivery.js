@@ -5,7 +5,9 @@ const fs = require('fs'), path = require('path');
 const SET = process.argv[2] || 'set1', C = require('./content-delivery' + SET.slice(3) + '.js');
 const MAN = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'assets', 'delivery', 'manifest.json'), 'utf8'));
 const BASE = process.env.BASE || 'https://raw.githubusercontent.com/nika619/conjure-svgator/main/assets/';
-const W = 1920, H = 1080, DUR = 23000, P = [960, 540];
+const W = 1920, H = 1080, P = [960, 540];
+// v3 time warp: every key at or after WARP_AT moves WARP_DT later, so the Nice List joke gets its own reading beat without retiming every shot by hand
+const WARP_AT = 12200, WARP_DT = 1200, WARP = t => t >= WARP_AT ? t + WARP_DT : t, DUR = 23000 + WARP_DT;
 
 // ---------------- engine (same document model as scene-market.js, plus filters) ----------------
 const cb = (a, b, c, d) => ({ type: 'cubic-bezier', value: { from: { x: a, y: b }, to: { x: c, y: d } } });
@@ -50,7 +52,7 @@ function E(type, title, o = {}) {
     n.animators = {};
     for (const k in o.a) {
       if (!o.a[k] || !o.a[k].length) continue;
-      const [grp, chn, wrap] = CH[k], ks = o.a[k].filter(q => q[0] <= DUR).map(([t, v, e], i, all) => ({ time: Math.round(t), value: wrap(v), ...(e && e !== LIN && k !== 'op' && k !== 'f' && i < all.length - 1 ? { easing: e } : {}) }));
+      const [grp, chn, wrap] = CH[k], ks = o.a[k].map(([t, v, e]) => [WARP(t), v, e]).filter(q => q[0] <= DUR).map(([t, v, e], i, all) => ({ time: Math.round(t), value: wrap(v), ...(e && e !== LIN && k !== 'op' && k !== 'f' && i < all.length - 1 ? { easing: e } : {}) }));
       for (let i = 1; i < ks.length; i++) if (ks[i].time <= ks[i - 1].time) ks[i].time = ks[i - 1].time + 1;   // strictly increasing
       while (ks.length > 1 && ks[ks.length - 1].time > DUR) ks.pop(); if (!ks.length) continue;
       if (ks.length) delete ks[ks.length - 1].easing;
@@ -179,8 +181,10 @@ const inkLoop = (() => {   // hand-drawn loop: 1.1 turns of a wobbly ellipse, Ca
   return pts.map(([x, y], i) => { const p0 = pts[Math.max(0, i - 1)], p2 = pts[Math.min(pts.length - 1, i + 1)], hx = (p2[0] - p0[0]) / 6, hy = (p2[1] - p0[1]) / 6;
     return { x: r1(x), y: r1(y), type: 'cusp', mode: 0, ...(i ? { start: { x: r1(x - hx), y: r1(y - hy) } } : {}), ...(i < pts.length - 1 ? { end: { x: r1(x + hx), y: r1(y + hy) } } : {}) }; });
 })(), LOOPLEN = Math.round(Math.PI * (CRX + CRY) * 1.3);
+const JOKE = cb(.55, 0, .2, 1), HEROAT = s => [960 - s * (CX - 960), 528 - s * (CY - 560)];   // camera origin that puts the recipient line at frame centre under zoom s
 const SX = PX0 + PW / 2 + 74, SY = RODY + 414, STAMP = 12020;
-const paper = piv('list sway (hangs from the rod)', [PX0 + PW / 2, RODY], { a: { r: osc(9500, 12300, 2800, -0.5, 0.5) }, kids: [G('EDIT ME 2 - the Nice List (entries are live text; entry 4 = the tag recipient)', [
+// the sway dies down before the joke is read
+const paper = piv('list sway (hangs from the rod)', [PX0 + PW / 2, RODY], { a: { r: [...osc(9500, 11200, 1400, -0.6, 0.45), [11600, 0, SOFT]] }, kids: [G('EDIT ME 2 - the Nice List (entries are live text; entry 4 = the tag recipient)', [
   E('g', 'paper (unrolls)', { mask: 'm-paper', kids: [
     E('mask', 'unroll mask', { id: 'm-paper', kids: [rect('reveal', PX0 - 10, RODY, PW + 20, 10, { fill: col([255, 255, 255]), a: { size: [[U0, [PW + 20, 1], cb(.35, 0, .25, 1)], [U1, [PW + 20, PH + 40]]] } })] }),
     E('image', 'parchment', { o: [PX0, RODY], shape: img('delivery/s5/paper.webp', PW, PH), filter: [{ type: 'drop-shadow', value: { blur: { x: 10, y: 10 }, offset: { x: 0, y: 8 }, color: { r: 20, g: 10, b: 4, a: .45 } } }] }),
@@ -203,7 +207,7 @@ const paper = piv('list sway (hangs from the rod)', [PX0 + PW / 2, RODY], { a: {
 const S5P = [960, 470], WHIPV = [12240, 12520];
 const s5 = piv('S5 the Nice List (medium close-up)', S5P, { a: { op: visible(9500, WHIPV[1]), s: [[9500, 1.4, OUT], [10000, 1]], f: [[9500, blur(12)], [9850, blur(0)], [WHIPV[0], blur(0)], [12380, blur(26)], [WHIPV[1], blur(30)]],
   o: [[9500, S5P], [STAMP, S5P, OUT], [STAMP + 40, [S5P[0], S5P[1] + 9], SINE], [STAMP + 90, [S5P[0] - 5, S5P[1] - 4], SINE], [STAMP + 150, [S5P[0] + 2, S5P[1] + 2], SINE], [WHIPV[0], S5P, WHIP], [WHIPV[1], [S5P[0], S5P[1] + H]]] }, kids: [
-  piv('s5-camera (slow push)', [960, 560], { a: { s: [[9500, 1.0, GLIDE], [12300, 1.07]], o: [[9500, [960, 600], GLIDE], [12300, [960, 560]]] }, kids: [
+  piv('s5-camera (push onto the joke)', [960, 560], { a: { s: [[9500, 1.0, GLIDE], [11450, 1.05, JOKE], [12160, 2.0, LIN], [12300, 2.04]], o: [[9500, [960, 600], GLIDE], [11450, [960, 575], JOKE], [12160, HEROAT(2.0), LIN], [12300, HEROAT(2.04)]] }, kids: [
     E('image', 'town bokeh', { o: [-700, -120], shape: img(L(PANO, 'far').file, 3400, 1300), filter: blur(14), op: .85 }),
     ...Array.from({ length: 9 }, () => { const x = R(0, 1920), y = R(150, 950), z = R(40, 120); return glow('bokeh', x, y, z, z, osc(9500, 12300, R(1400, 2600), .15, .5)); }),
     piv('santa (breathes)', [960, 1080], { a: { s: osc(9500, 12300, 1800, [1, 1], [1.004, 1.012], SINE) }, kids: [plate(S5, 'santa-mcu'), plate(S5, 'arm-rod'), paper] }),
