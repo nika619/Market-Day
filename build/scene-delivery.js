@@ -280,14 +280,27 @@ const beam = G('light from the box', [
   glow('burst', BT[0], BT[1] - 40, 900, 900, [[0, 0], [POP - 40, 0], [POP + 60, 1], [POP + 700, .55], [23000, .45]], { a: { s: [[POP - 40, .2, OUT], [POP + 400, 1.15, IO], [23000, 1]] } }),
   ...Array.from({ length: 22 }, () => { const t = R(POP, 21600); return sparkle(BT[0] + R(-60, 60), BT[1] - R(0, 40), R(8, 22), t, R(1100, 1900), R(-140, 140), -R(260, 520), { peak: .8 }); }),
 ]);
-const PB = [300, 360], PBASE = [BT[0] + 20, BT[1] + 8];   // product box: bottom-centre sits in the box opening
-const product = G('EDIT ME 1 - product-image (rises from the box)', [
+const PB = C.productBox || [300, 360], PBASE = [BT[0] + 20, BT[1] + 8];   // product box: bottom-centre sits in the box opening
+const UP = d => [PBASE[0], PBASE[1] - d], LOW = [PBASE[0], PBASE[1] + PB[1] + 10];   // heights above the rim; LOW is fully inside the box
+const pimg = () => E('image', 'product-image (transparent cut-out; base on the bottom edge)', { o: [PBASE[0] - PB[0] / 2, PBASE[1] - PB[1]], shape: img(C.product, PB[0], PB[1], 'xMidYMax meet') });
+const hover = (t0 = 20700) => osc(t0, 23000, 2600, UP(74), UP(84));
+// four reveals on the same beat (lid pops at POP, product settles by ~20.7 s), each suited to a product shape; the template keeps all four, one visible
+const REVEALS = {
+  rise: () => piv('rise (tall products)', PBASE, { a: { o: [[0, LOW], [POP + 150, LOW, SOFT], [20250, UP(86), SPRING], [20700, UP(74), SINE], ...hover()] }, kids: [pimg()] }),
+  spin: () => piv('spin (wide products: a turntable turn)', PBASE, { a: { o: [[0, LOW], [POP + 150, LOW, cb(.25, 0, .2, 1)], [20000, UP(70), SINE], [20700, UP(74), SINE], ...hover()] }, kids: [
+    piv('turntable', [PBASE[0], PBASE[1] - PB[1] / 2], { a: { s: [[19950, [1, 1], cb(.6, 0, .4, 1)], [20250, [-1, 1], cb(.6, 0, .4, 1)], [20550, [1, 1], SPRING], [20750, [1, 1]]], r: [[19950, 0, IO], [20250, -4, IO], [20550, 2, SINE], [20750, 0]] }, kids: [pimg()] })] }),
+  bounce: () => piv('bounce (squat products)', PBASE, { a: {
+    o: [[0, LOW], [POP + 150, LOW, cb(.2, .7, .4, 1)], [20080, UP(140), cb(.55, 0, 1, .6)], [20330, UP(74), cb(0, .4, .4, 1)], [20480, UP(100), cb(.55, 0, 1, .6)], [20620, UP(74), cb(0, .4, .4, 1)], [20700, UP(81), IN], [20780, UP(74), SINE], ...hover(20900)],
+    s: [[POP + 150, [.9, 1.12], OUT], [20080, [.97, 1.04], IN], [20329, [.95, 1.06], LIN], [20330, [1.16, .84], OUT], [20450, [.97, 1.03], IO], [20619, [1, 1], LIN], [20620, [1.08, .92], OUT], [20760, [1, 1]]] }, kids: [pimg()] }),
+  turn: () => piv('turn (boxy products: turns to face the camera)', PBASE, { a: { o: [[0, LOW], [POP + 150, LOW, SOFT], [20250, UP(80), SOFT], [20700, UP(74), SINE], ...hover()] }, kids: [
+    piv('turn to face', [PBASE[0], PBASE[1] - PB[1] / 2], { a: { s: [[0, [.16, 1]], [20000, [.16, 1], cb(.3, 0, .15, 1.12)], [20650, [1, 1]]], r: [[20000, -10, cb(.3, 0, .2, 1)], [20650, 0]] }, kids: [pimg()] })] }),
+};
+const REV = C.reveal || 'rise';
+const product = G('EDIT ME 1 - product-image + reveal style (keep ONE of: rise / spin / bounce / turn)', [
   glow('product glow', PBASE[0], PBASE[1] - 330, 620, 520, [[0, 0], [POP + 200, 0], [20300, .75], [23000, .6]]),
   E('g', 'emerges through the opening', { clip: 'c-open', kids: [
     E('clipPath', 'above the rim', { id: 'c-open', kids: [rect('above rim', BT[0] - 500, BT[1] - 900, 1000, 900 + 6, { fill: col([255, 255, 255]) })] }),
-    piv('product-rise', PBASE, { a: { o: [[0, [PBASE[0], PBASE[1] + 330]], [POP + 150, [PBASE[0], PBASE[1] + 330], SOFT], [20250, [PBASE[0], PBASE[1] - 86], SPRING], [20700, [PBASE[0], PBASE[1] - 74], SINE], ...osc(20700, 23000, 2600, [PBASE[0], PBASE[1] - 74], [PBASE[0], PBASE[1] - 84])] }, kids: [
-      E('image', 'product-image (transparent cut-out; base on the bottom edge)', { o: [PBASE[0] - PB[0] / 2, PBASE[1] - PB[1]], shape: img(C.product, PB[0], PB[1], 'xMidYMax meet') }),
-    ] }),
+    ...Object.keys(REVEALS).map(k => G('reveal: ' + k + (k === REV ? ' (in use)' : ' (spare: set opacity to 100% and hide the one in use)'), [REVEALS[k]()], { op: k === REV ? 1 : 0 })),
   ] }),
 ]);
 // focus pull: as the camera pushes in on the gift the room behind (and the foreground) goes soft; the pull-back sharpens it, a touch soft behind the end card
