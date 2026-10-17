@@ -239,7 +239,9 @@ const s6 = piv('S6 the drop (rooftop)', P, { id: 'p-s6', a: { op: [[0, 0], [WHIP
 ] });
 const MP = L(S6, 'mouth');
 const s7 = G('S7 down the chimney', [
-  piv('flue push', P, { a: { s: [[14950, 1.0, IN], [15600, 2.6]] }, kids: [E('image', 'mouth (looking down the flue)', { o: [MP.x, MP.y], shape: img(MP.file, MP.w, MP.h) })] }),
+  piv('flue push', P, { a: { s: [[14950, 1.0, IN], [15600, 2.6]] }, kids: [E('image', 'mouth (looking down the flue)', { o: [MP.x, MP.y], shape: img(MP.file, MP.w, MP.h) }),
+    piv('gift falls away down the flue', [MP.x + MP.w / 2, MP.y + MP.h * .2], { a: { o: [[15090, [MP.x + MP.w / 2, MP.y + MP.h * .2], SOFT], [15540, [MP.x + MP.w / 2, MP.y + MP.h / 2]]], s: [[15090, 1.5, SOFT], [15540, .1]], r: [[15090, -20, LIN], [15540, 200]], op: [[0, 0], [15089, 0], [15090, 1], [15440, 1], [15540, 0]] }, kids: [spr('falling gift', TS.upright.file, MP.x + MP.w / 2, MP.y + MP.h * .2, TW, TH)] }),
+  ] }),
 ], { a: { op: [[0, 0], [15079, 0], [15140, 1], [15700, 1], [15701, 0]] } });   // a fast cut, not a dissolve: the top-down flue does not line up with the rooftop push
 
 // ---------------- S8-S10 the room (15600-23000) ----------------
@@ -304,7 +306,7 @@ const s8 = G('S8-S10 the living room', [
   ]),
   roomL('near', [], FOCUS(7, 4)),
   rect('warm grade (soft-light)', 0, 0, W, H, { fill: col([255, 170, 90]), blend: 'soft-light', op: .07 }),
-], { id: 'p-room', a: { op: [[0, 0], [15699, 0], [15700, 1]] } });
+], { id: 'p-room', a: { op: [[0, 0], [15699, 0], [15700, 1]], f: [[15700, blur(10)], [16000, blur(0)]] } });
 
 // ---------------- end card text (screen space) ----------------
 const TX = 1180, AC = C.accent;
@@ -345,6 +347,7 @@ const snow = G('snow (exterior)', [G('far flakes', Array.from({ length: 30 }, ()
 // ---------------- finish ----------------
 const bridge = G('chimney to fireplace: firelight bloom', [
   rect('warm wash', 0, 0, W, H, { fill: col([255, 140, 60]), a: { op: [[0, 0], [15200, 0], [15580, .5], [15720, .42], [16100, 0]] } }),
+  ...Array.from({ length: 7 }, (_, i) => { const a = i * 2.4 + .5, t = 15380 + i * 45, z = R(380, 760); return spr('ember past the lens', 'glow-gold.jpg', 960 + Math.cos(a) * 140, 540 + Math.sin(a) * 90, z, z, { ...light, a: { o: [[t, [960 + Math.cos(a) * 140, 540 + Math.sin(a) * 90], IN], [t + 420, [960 + Math.cos(a) * 1500, 540 + Math.sin(a) * 900]]], s: [[t, .3, IN], [t + 420, 2.4]], op: [[0, 0], [t - 1, 0], [t, .9], [t + 420, 0]] } }); }),
   spr('fire bloom', 'glow-gold.jpg', 960, 560, 2900, 2400, { ...light, a: { op: [[0, 0], [15150, 0], [15560, 1], [15800, .75], [16250, 0]], s: [[15150, .35, IN], [15600, 1.05, OUT], [16250, 1.25]] } }),
 ]);
 const finish = G('finish: vignette, letterbox', [
