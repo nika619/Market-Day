@@ -3,6 +3,7 @@ module.exports = {
   brand: 'Pixel',
   logo: 'delivery/logos/pixel.webp', logoBox: [360, 120],
   product: 'delivery/products/pixel.webp',
+  reveal: 'turn',                                                       // rise · spin · bounce · turn
   title: '’Twas the night before Christmas…',
   tag: ['To: the one who’ll', '“send the pics later”.'],
   list: ['Grandma — nice.', 'The dog — nice (mostly).', 'Cookie thief — under review.'],

@@ -3,6 +3,7 @@ module.exports = {
   brand: 'Cocoa & Co',
   logo: 'delivery/logos/cocoa.webp', logoBox: [360, 120],
   product: 'delivery/products/cocoa.webp',
+  reveal: 'bounce',                                                       // rise · spin · bounce · turn
   title: '’Twas the night before Christmas…',
   tag: ['To: whoever puts back', 'an empty milk carton.'],
   list: ['Grandma — nice.', 'The dog — nice (mostly).', 'Cookie thief — under review.'],
