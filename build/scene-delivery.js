@@ -311,22 +311,22 @@ const s8 = G('S8-S10 the living room', [
 // ---------------- end card text (screen space) ----------------
 const TX = 1180, AC = C.accent;
 const endText = G('EDIT ME 4 - end card: logo, headline, cta-text, signoff', [
-  rect('end-card scrim (keeps the words legible)', 760, 0, 1160, H, { fill: { type: 'linear-gradient', value: { from: { x: 0, y: 0 }, to: { x: 1, y: 0 }, stops: [{ offset: 0, color: { r: 12, g: 8, b: 6, a: 0 } }, { offset: .45, color: { r: 12, g: 8, b: 6, a: .55 } }, { offset: 1, color: { r: 12, g: 8, b: 6, a: .7 } }], spread: 'pad', fixed: false } }, a: { op: [[0, 0], [20100, 0], [20800, 1]] } }),
+  rect('end-card scrim (keeps the words legible)', 760, 0, 1160, H, { fill: { type: 'linear-gradient', value: { from: { x: 0, y: 0 }, to: { x: 1, y: 0 }, stops: [{ offset: 0, color: { r: 12, g: 8, b: 6, a: 0 } }, { offset: .45, color: { r: 12, g: 8, b: 6, a: .66 } }, { offset: 1, color: { r: 12, g: 8, b: 6, a: .84 } }], spread: 'pad', fixed: false } }, a: { op: [[0, 0], [20100, 0], [20800, 1]] } }),
   G('logo-reveal', [   // a ribbon wipe: the logo is unveiled left to right behind an accent-coloured edge
     E('mask', 'logo wipe', { id: 'm-logo', kids: [rect('wipe', TX - 20, 196, 1, C.logoBox[1] + 28, { id: 'x-logo-wipe', fill: col([255, 255, 255]), a: { size: [[20350, [1, C.logoBox[1] + 28], SOFT], [20950, [C.logoBox[0] + 40, C.logoBox[1] + 28]]] } })] }),
     E('image', 'logo', { o: [TX, 210], shape: img(C.logo, C.logoBox[0], C.logoBox[1], 'xMinYMid meet') }),
     rect('ribbon edge (accent)', TX - 26, 196, 5, C.logoBox[1] + 28, { id: 'x-logo-ribbon', fill: col(AC), a: { o: [[20350, [TX - 26, 196], SOFT], [20950, [TX + C.logoBox[0] + 14, 196]]], op: [[0, 0], [20349, 0], [20350, 1], [20850, 1], [21050, 0]] } }),
   ], { mask: 'm-logo', a: { op: [[0, 0], [20349, 0], [20350, 1]], o: [[20350, [0, 10], OUT], [20950, [0, 0]]] } }),
   E('g', 'headline (masked line rise)', { mask: 'm-head', kids: [
-    E('mask', 'headline mask', { id: 'm-head', kids: [rect('window', TX - 20, 330, 760, 230, { fill: col([255, 255, 255]) })] }),
-    ...C.headline.map((s, i) => G('headline-line-' + (i + 1), [txt('headline line ' + (i + 1) + ' (edit me)', s, TX, 420 + i * 92, 'Fraunces', 84, 600, { italic: i === 1, color: i === 1 ? AC : [255, 246, 230] })],
-      { a: { o: [[20600 + i * 160, [0, 110], SOFT], [21250 + i * 160, [0, 0]]], op: [[0, 0], [20590 + i * 160, 0], [20600 + i * 160, 1]] } })),
+    E('mask', 'headline mask', { id: 'm-head', kids: [rect('window', TX - 20, 318, 760, 274, { fill: col([255, 255, 255]) })] }),
+    ...C.headline.map((s, i) => G('headline-line-' + (i + 1), [txt('headline line ' + (i + 1) + ' (edit me)', s, TX, 424 + i * 104, 'Fraunces', 98, 600, { italic: i === 1, color: i === 1 ? AC : [255, 246, 230] })],
+      { a: { o: [[20600 + i * 160, [0, 130], SOFT], [21250 + i * 160, [0, 0]]], op: [[0, 0], [20590 + i * 160, 0], [20600 + i * 160, 1]] } })),
   ] }),
-  piv('cta (pops)', [TX + 150, 620], { a: { s: [[21500, .9, SPRING], [21850, 1]], op: [[0, 0], [21500, 0], [21640, 1]] }, kids: [
-    rect('cta pill (accent colour)', TX, 588, 300, 64, { rx: 32, fill: col(AC) }),
-    txt('cta-text (max 16 chars)', C.cta, TX + 150, 630, 'DM Sans', 26, 700, { anchor: 'middle', color: [36, 24, 12], ls: .5 }),
+  piv('cta (pops)', [TX + 150, 648], { a: { s: [[21500, .9, SPRING], [21850, 1]], op: [[0, 0], [21500, 0], [21640, 1]] }, kids: [
+    rect('cta pill (accent colour)', TX, 616, 300, 64, { rx: 32, fill: col(AC) }),
+    txt('cta-text (max 16 chars)', C.cta, TX + 150, 658, 'DM Sans', 26, 700, { anchor: 'middle', color: [36, 24, 12], ls: .5 }),
   ] }),
-  G('signoff', [txt('signoff (edit me)', C.signoff, TX, 712, 'Fraunces', 30, 500, { italic: true, color: [255, 220, 170] })], { a: { op: [[0, 0], [22000, 0], [22500, 1]], o: [[22000, [0, 12], OUT], [22500, [0, 0]]] } }),
+  G('signoff', [txt('signoff (edit me)', C.signoff, TX, 744, 'Fraunces', 30, 500, { italic: true, color: [255, 220, 170] })], { a: { op: [[0, 0], [22000, 0], [22500, 1]], o: [[22000, [0, 12], OUT], [22500, [0, 0]]] } }),
 ]);
 const title1 = G('EDIT ME 5 - title-line (opening)', [
   E('g', 'title (fades out)', { a: { op: [[0, 1], [2650, 1], [3100, 0]] }, kids: [
