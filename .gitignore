@@ -9,3 +9,4 @@ build/delivery*.json
 build/delivery*-chunks/
 build/delivery-ops/
 build/tr/
+delivery-v3-up/
