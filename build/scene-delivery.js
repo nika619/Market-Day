@@ -256,8 +256,8 @@ const roomL = (n, kids = []) => camLayer(n, KR, rl_(n), [plate(RM, n), ...kids])
 const RB = MAN.ANCH_ROOM.anchors;
 const s8 = G('S8-S10 the living room', [
   roomL('back'),
-  roomL('fire', RB.flames.filter((f, i) => i % 2 === 0).map(([x, y, r]) => glow('flame', x, y - r, r * 8, r * 10, osc(15600 + R(0, 300), 23000, R(260, 420), .35, .85)))),
-  roomL('tree', RB.bulbs.filter((b, i) => i % 3 !== 2).map(([x, y, r], i) => glow('tree light', x, y, r * 6, r * 6, [[0, .2], ...osc(15600 + i * 37, 23000, 2200, .25, .9)]))),
+  roomL('fire', RB.flames.filter((f, i) => i % 2 === 0).map(([x, y, r]) => glow('flame', x, y - r, r * 8, r * 10, osc(15600 + R(0, 300), 23000, R(700, 1000), .4, .85)))),
+  roomL('tree', RB.bulbs.filter((b, i) => i % 2 === 0).map(([x, y, r], i) => glow('tree light', x, y, r * 6, r * 6, [[0, .2], ...osc(15600 + i * 37, 23000, 2200, .25, .9)]))),
   roomL('rug'),
   camLayer('gift + product (rest on the rug)', KR, 1, [
     piv('contact shadow (stays on the floor)', [BB[0], BB[1] - 6], { a: { op: [[0, 0], [16400, 0], [LAND, .75], [16960, .45], [17110, .75]], s: [[16400, .45, IN], [LAND, 1, OUT], [16960, .8, IN], [17110, 1]] }, kids: [rect('shadow', BB[0] - 300, BB[1] - 46, 600, 80, { rx: 40, fill: col([24, 10, 4], .8), filter: blur(22) })] }),
@@ -321,8 +321,9 @@ const SPLIT = ['p-s1', 'p-s2', 'p-s2team', 'p-s4', 'p-s4team', 'p-s6', 'p-s6team
 const strip = (e, keep) => (SPLIT.includes(e.id) && e.id !== keep) ? { id: e.id, type: 'g', title: e.title } : { ...e, ...(e.children ? { children: e.children.map(c => strip(c, keep)) } : {}) };
 const find = (e, id) => e.id === id ? e : (e.children || []).reduce((r, c) => r || find(c, id), null);
 const cdir = path.join(__dirname, out + '-chunks'); fs.rmSync(cdir, { recursive: true, force: true }); fs.mkdirSync(cdir);
-const base = strip(doc, null); fs.writeFileSync(path.join(cdir, '0-base.json'), JSON.stringify(base)); console.log('chunk base', (JSON.stringify(base).length / 1024).toFixed(1), 'KB');
-SPLIT.forEach((id, i) => { const el = strip(find(doc, id), id); fs.writeFileSync(path.join(cdir, (i + 1) + '-' + id + '.json'), JSON.stringify(el)); console.log('chunk', id, (JSON.stringify(el).length / 1024).toFixed(1), 'KB'); });
+const base = strip(doc, null); const lined = o => JSON.stringify(o).replace(/\},\{/g, '},\n{');   // valid JSON, broken into short lines for reading
+fs.writeFileSync(path.join(cdir, '0-base.json'), lined(base)); console.log('chunk base', (JSON.stringify(base).length / 1024).toFixed(1), 'KB');
+SPLIT.forEach((id, i) => { const el = strip(find(doc, id), id); fs.writeFileSync(path.join(cdir, (i + 1) + '-' + id + '.json'), lined(el)); console.log('chunk', id, (JSON.stringify(el).length / 1024).toFixed(1), 'KB'); });
 fs.writeFileSync(path.join(__dirname, out + '.json'), JSON.stringify(doc));
 fs.writeFileSync(path.join(__dirname, out + '.js'), 'window.SCENE_BASE=' + JSON.stringify(BASE) + ';window.SCENE=' + JSON.stringify(doc) + ';');
 console.log(out + '.json', (JSON.stringify(doc).length / 1024).toFixed(1), 'KB');
