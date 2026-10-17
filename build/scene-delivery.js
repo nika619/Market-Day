@@ -225,7 +225,7 @@ const tumble = G('gift tumble (24-frame sequence)', Array.from({ length: TN }, (
 const s6 = piv('S6 the drop (rooftop)', P, { id: 'p-s6', a: { op: [[0, 0], [WHIPV[0] - 1, 0], [WHIPV[0], 1], [15150, 1], [15250, 0]], o: [[WHIPV[0], [P[0], P[1] - H], WHIP], [WHIPV[1], P]], f: [[WHIPV[0], blur(30)], [12380, blur(26)], [WHIPV[1], blur(0)], [14950, blur(0)], [15150, blur(16)]] }, kids: [   // the push into the chimney blurs into the flue cut
   camLayer('sky (+ stars)', K6, .06, [E('image', 'sky', { o: [L(S6, 'sky').x, L(S6, 'sky').y - 500], shape: img(L(S6, 'sky').file, L(S6, 'sky').w, L(S6, 'sky').h + 500) }), ...stars(30, 600, 12300, 15200)]),
   camLayer('moon', K6, depthFactor(S6, 'moon', F6), [(() => { const m = L(S6, 'moon'); return glow('moon glow', m.x + m.w / 2, m.y + m.h / 2, m.w * 2.8, m.h * 2.8, [[0, .5]]); })(), plate(S6, 'moon')]),
-  piv('team swoops overhead', P, { a: { o: [[12300, [-360, 330], SOFT], [13250, [700, 150], SOFT], [14100, [2300, 260]]], s: [[12300, .38, LIN], [14100, .3]], r: [[12300, -6, SOFT], [13250, -12, SOFT], [14100, -2]] }, kids: [E('g', 'team rig', { id: 'p-s6team', kids: [teamRig('team (small)', { t0: 12300, t1: 14100, period: 360, bells: false, arm: { r: [[12300, 0, OUT], [12850, -38, SPRING], [13050, 62, OUT], [13400, 20, IO], [13800, 0]] } })] })] }),
+  piv('team swoops overhead', P, { a: { o: [[12300, [-360, 330], SOFT], [13250, [700, 150], SOFT], [14100, [2300, 260]]], s: [[12300, .38, LIN], [14100, .3]], r: [[12300, -4, SOFT], [13020, -15, cb(.5, 0, .3, 1)], [13850, 1.5, SOFT], [14100, -1]] }, kids: [E('g', 'team rig', { id: 'p-s6team', kids: [teamRig('team (small)', { t0: 12300, t1: 14100, period: 360, bells: false, arm: { r: [[12300, 0, OUT], [12850, -38, SPRING], [13050, 62, OUT], [13400, 20, IO], [13800, 0]] } })] })] }),
   camLayer('town below', K6, depthFactor(S6, 'town', F6), [plate(S6, 'town')]),
   camLayer('roof (+ ridge lights)', K6, depthFactor(S6, 'roof', F6), [plate(S6, 'roof')]),
   camLayer('the gift (behind the chimney, so it drops in)', K6, 1, [
@@ -255,17 +255,17 @@ const LAND = 16800, BOW = A(GF, 'bow'), POP = 19250;
 const GBX = [BB[0], BB[1]];   // the box rests on this floor point
 const giftRig = G('Santa’s gift', [
   piv('gift-flight (out of the fireplace)', GBX, { a: {
-    o: [[16150, [FM[0], FM[1] + 40], OUT], [16500, [(FM[0] + GBX[0]) / 2, GBX[1] - 260], IN], [LAND, GBX, OUT], [16960, [GBX[0], GBX[1] - 46], IN], [17110, GBX, OUT], [17220, [GBX[0], GBX[1] - 10], IN], [17320, GBX]],
+    o: [[16150, [FM[0], FM[1] + 40], OUT], [16500, [(FM[0] + GBX[0]) / 2, GBX[1] - 260], cb(.55, 0, .75, .85)], [LAND, GBX, OUT], [16960, [GBX[0], GBX[1] - 46], IN], [17110, GBX, OUT], [17220, [GBX[0], GBX[1] - 10], IN], [17320, GBX]],
     s: [[16150, .55, OUT], [LAND - 1, 1, LIN], [LAND, [1.16, .8], OUT], [16900, [.94, 1.08], IO], [17110, [1.08, .9], OUT], [17200, [.98, 1.03], IO], [17320, [1, 1]]],
-    r: [[16150, -24, OUT], [16500, 10, IN], [LAND, -3, OUT], [17110, 1.5, IO], [17320, 0]],
+    r: [[16150, -32, OUT], [16500, 12, cb(.5, 0, .7, .9)], [LAND, -2, OUT], [17110, 1.5, IO], [17320, 0]],
     op: [[0, 0], [16149, 0], [16150, 1]] }, kids: [
     gp('gift-box'),
-    piv('lid tremble', [BT[0], BT[1]], { a: { r: [[18750, 0, LIN], ...Array.from({ length: 7 }, (_, k) => [18800 + k * 65, k % 2 ? -2.6 : 2.6, SINE]), [POP - 10, 0]], o: [[POP - 30, BT, OUT], [POP + 120, [BT[0], BT[1] - 40], IO], [POP + 380, [BT[0], BT[1] - 8]]] }, kids: [
+    piv('lid tremble', [BT[0], BT[1]], { a: { r: [[18750, 0, LIN], ...Array.from({ length: 7 }, (_, k) => [18800 + k * 65, k % 2 ? -2.6 : 2.6, SINE]), [POP - 10, 0]], o: [[LAND, BT, OUT], [LAND + 60, [BT[0], BT[1] + 9], SPRING], [LAND + 320, BT, LIN], [POP - 30, BT, OUT], [POP + 120, [BT[0], BT[1] - 40], IO], [POP + 380, [BT[0], BT[1] - 8]]] }, kids: [
       E('g', 'lid closed', { a: { op: [[0, 1], [POP, 1], [POP + 1, 0]] }, kids: [gp('gift-lid'),
         piv('bow (collapses)', BOW, { a: { s: [[18300, 1, OUT], [18420, 1.14, IN], [18680, .15]], r: [[18420, 0, IN], [18680, 70]], op: [[0, 1], [18560, 1], [18690, 0]] }, kids: [gp('gift-bow')] })] }),
       (() => { const lm = L(GF, 'gift-lid-mid'), c = [lm.x + lm.w / 2, lm.y + lm.h / 2]; return piv('lid pops off and tumbles away', c, { a: { op: [[0, 0], [POP, 0], [POP + 1, 1], [POP + 420, 1], [POP + 560, 0]], o: [[POP, c, OUT], [POP + 560, [c[0] + 760, c[1] - 560]]], r: [[POP, 0, OUT], [POP + 560, 48]], s: [[POP, .95, OUT], [POP + 560, 1.12]] }, kids: [gp('gift-lid-mid')] }); })(),
     ] }),
-    piv('tag swing', TAGPIN, { a: { r: [[LAND, 0, OUT], ...Array.from({ length: 12 }, (_, k) => [LAND + 120 + k * 230, (k % 2 ? -1 : 1) * 26 * Math.exp(-k / 3.4), SINE]), [POP, 0, OUT], [POP + 300, -18, OUT], [POP + 900, 4]], op: [[0, 1], [POP + 120, 1], [POP + 420, 0]] }, kids: [
+    piv('tag swing', TAGPIN, { a: { r: [[LAND, 0, OUT], ...Array.from({ length: 12 }, (_, k) => [LAND + 90 + k * 245, (k % 2 ? -1 : 1) * 36 * Math.exp(-k / 3.1), SINE]), [POP, 0, OUT], [POP + 300, -18, OUT], [POP + 900, 4]], op: [[0, 1], [POP + 120, 1], [POP + 420, 0]] }, kids: [
       piv('tag (oversized so it reads)', TAGPIN, { s: 2.2, kids: [gp('gift-tag'),
         G('EDIT ME 3 - tag-to (live text)', C.tag.map((s, i) => txt('tag-to line ' + (i + 1), s, TAGC[0], TAGC[1] - 8 + i * 13, 'Fraunces', 9.6, 600, { italic: true, anchor: 'middle', color: [70, 46, 28] })))] }),
     ] }),
