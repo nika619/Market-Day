@@ -78,9 +78,10 @@ const blur = v => [{ type: 'blur', value: { x: v, y: v } }];
 
 // ---------------- the multiplane camera ----------------
 // keys: [time, zoom, panX, panY (frame px at the focus depth), roll deg, easing to next]; a layer at depth D moves by focusDepth/D of that.
-function camLayer(title, keys, d, kids, extra = {}) {
+function camLayer(title, keys, d, kids, extra = {}, focus) {   // focus: blur keys, for a focus pull between depth layers
   const a = { o: keys.map(([t, s, x, y, r, e]) => [t, [P[0] + x * d, P[1] + y * d], e]), s: keys.map(([t, s, x, y, r, e]) => [t, 1 + (s - 1) * d, e]) };
   if (keys.some(k => k[4])) a.r = keys.map(([t, s, x, y, r = 0, e]) => [t, r, e]);
+  if (focus) a.f = focus;
   return piv(title, P, { a, kids, ...extra });
 }
 const depthFactor = (shot, name, focus) => focus / (L(shot, name).depth || focus);
@@ -119,19 +120,24 @@ function teamRig(title, { t0, t1, period = 420, arm = null, bells = true }) {
 const S1 = 'S1', F1 = 13, KEY1 = [[0, 1.0, 0, 300, 0, PREM], [3200, 1.06, 0, 0, 0, LIN]];   // starts tilted up at the stars, cranes down and pushes in
 const stars = (n, yMax, t0 = 0, t1 = 3200) => Array.from({ length: n }, () => { const x = R(-60, 1980), y = R(-420, yMax), z = R(1.6, 4.2), t = t0 + R(150, 1500);
   return rect('star', x, y, z, z, { rx: z / 2, fill: col([255, 246, 220]), a: { op: [[0, 0], [t, 0], [t + 300, R(.5, 1)], ...osc(t + 300, t1, R(1300, 2600), R(.6, 1), R(.25, .5))] } }); });
-const s1 = G('S1 night over the town', [
+// S1 -> S2 match zoom: the camera rushes into the moon until it is the S2 moon (same place, same size), then S2 opens around it through a soft iris.
+// New elements in this pass carry explicit ids ('x-...') so every existing id stays as uploaded.
+const MOONC = [1180, 470], MOOND = 760;
+const M1 = (() => { const m = L(S1, 'moon'), k = 1 + .06 * depthFactor(S1, 'moon', F1); return [P[0] + k * (m.x + m.w / 2 - P[0]), P[1] + k * (m.y + m.h / 2 - P[1]), m.w * k]; })();
+const S2K = .82, ZM = MOOND * S2K / M1[2], ZIN = cb(.6, 0, .9, .4);   // S2 starts at 82% and settles, so the zoom keeps its momentum through the cut
+const s1 = piv('S1 night over the town', M1.slice(0, 2), { id: 'p-s1', a: { op: visible(0, 3550), o: [[2600, M1.slice(0, 2), ZIN], [3200, MOONC, OUT], [3550, MOONC]], s: [[2600, 1, ZIN], [3200, ZM, OUT], [3550, ZM * 1.3]], f: [[2900, blur(0)], [3200, blur(5)], [3550, blur(9)]] }, kids: [
   camLayer('sky (+ stars)', KEY1, .08, [E('image', 'sky', { o: [L(S1, 'sky').x, L(S1, 'sky').y - 600], shape: img(L(S1, 'sky').file, L(S1, 'sky').w, L(S1, 'sky').h + 600) }), ...stars(46, 420, 0, 3200)]),
   camLayer('moon', KEY1, depthFactor(S1, 'moon', F1), [plate(S1, 'moon'), (() => { const m = L(S1, 'moon'); return glow('moon glow', m.x + m.w / 2, m.y + m.h / 2, m.w * 2.6, m.h * 2.6, [[0, .45], ...osc(0, 3200, 2400, .45, .6)]); })()]),
   camLayer('far town', KEY1, depthFactor(S1, 'far', F1), [plate(S1, 'far')]),
   camLayer('mid town (windows flicker)', KEY1, depthFactor(S1, 'mid', F1), [plate(S1, 'mid'), ...MAN.ANCH_S1.anchors.windows.filter(() => rnd() < .13).map(([x, y, r]) => glow('flicker', x, y, r * 7, r * 7, osc(R(0, 600), 3200, R(700, 1500), .05, R(.25, .45))))]),
   camLayer('foreground: tree, snowman, fence (out of focus)', KEY1, depthFactor(S1, 'fg', F1), [plate(S1, 'fg'), ...MAN.ANCH_S1.anchors.bulbs.filter((b, i) => b[1] < 1150 && i % 2 === 0).map(([x, y, r]) => glow('bokeh', x, y, r * 5, r * 5, osc(R(0, 500), 3200, R(900, 1700), .25, .75)))]),
-], { id: 'p-s1', a: { op: visible(0, 3199) } });
+] });
 
 // ---------------- S2 long lens on the moon; the team crosses it in silhouette (3200-5650) ----------------
-const MOONC = [1180, 470], MOOND = 760;
-const s2 = G('S2 moon crossing (long lens)', [
+const s2 = piv('S2 moon crossing (long lens)', MOONC, { mask: 'm-iris', a: { op: [[0, 0], [3150, 0], [3260, 1], [5950, 1], [5951, 0]], s: [[3150, S2K, OUT], [3800, 1]], f: [[3200, blur(4)], [3500, blur(0)]] }, kids: [
+  E('mask', 'iris (opens from the moon)', { id: 'm-iris', kids: [piv('iris grow', MOONC, { id: 'x-iris-grow', a: { s: [[3150, .5, OUT], [3700, 3.6]] }, kids: [rect('iris disc (soft edge)', MOONC[0] - 500, MOONC[1] - 500, 1000, 1000, { id: 'x-iris-disc', fill: { type: 'radial-gradient', value: { center: { x: .5, y: .5 }, radius: .5, stops: [{ offset: 0, color: { r: 255, g: 255, b: 255, a: 1 } }, { offset: .72, color: { r: 255, g: 255, b: 255, a: 1 } }, { offset: 1, color: { r: 0, g: 0, b: 0, a: 1 } }], spread: 'pad', fixed: false } } })] })] }),
   piv('s2-push', P, { a: { s: [[3200, 1.0, GLIDE], [5650, 1.06]] }, kids: [
-    E('image', 'sky (long lens)', { o: [-100, -100], shape: img(L(S1, 'sky').file, 2120, 1280) }),
+    E('image', 'sky (long lens)', { o: [-560, -420], shape: img(L(S1, 'sky').file, 3040, 1800) }),   // oversized so it still fills the frame at the iris' 82% start
     ...stars(28, 1080, 3200, 5950),
     glow('moon halo', MOONC[0], MOONC[1], MOOND * 2.4, MOOND * 2.4, [[0, .55]]),
     spr('moon', L('MOON', 'moon').file, MOONC[0], MOONC[1], MOOND, MOOND),
@@ -140,21 +146,21 @@ const s2 = G('S2 moon crossing (long lens)', [
     E('g', 'silhouette', { id: 'p-s2team', filter: [{ type: 'brightness', value: 0 }], kids: [teamRig('team (silhouette)', { t0: 3200, t1: 5950, period: 380, bells: false })] }),
   ] }),
   ...Array.from({ length: 14 }, (_, i) => { const t = 3450 + i * 150, x = -380 + (t - 3300) / 2250 * 2240 - 220, y = 690 - (t - 3300) / 2250 * 270; return sparkle(x, y, R(18, 42), t, R(700, 1100), R(-90, -30), R(20, 70)); }),
-], { a: { op: visible(3200, 5950) } });
+] });
 
 // ---------------- S3 whip pan + S4 the team, tracking (5650-9500) ----------------
 const PANO = 'PANO', T0 = 5900, T1 = 9500;
 const panoLayer = (name, d, scroll) => piv('pano ' + name, P, { a: { o: [[T0, [P[0] + 260 * d, P[1]], GLIDE], [T1, [P[0] - scroll, P[1]]]] }, kids: [plate(PANO, name)] });
 const s4 = G('S4 the team (tracking over the town)', [
   piv('whip-in (pan blur)', P, { a: { o: [[5750, [1700, 540], OUT], [6150, [960, 540]]], f: [[5750, blur(30)], [6000, blur(8)], [6150, blur(0)]] }, kids: [
-    piv('s4-camera (bank + push)', P, { a: { r: [[T0, -2.5, PREM], [8000, 1.2, PREM], [T1, -0.6]], s: [[T0, 1.0, GLIDE], [9200, 1.08, IN], [T1, 1.7]], o: [[T0, P, GLIDE], [9200, [P[0], P[1] - 10], IN], [T1, [P[0] + 300, P[1] + 140]]] }, kids: [
+    piv('s4-camera (bank + push)', P, { a: { r: [[T0, -2.5, PREM], [8000, 1.2, PREM], [T1, -0.6]], s: [[T0, 1.0, GLIDE], [8900, 1.07, IN], [T1, 1.75]], o: [[T0, P, GLIDE], [8900, [P[0], P[1] - 8], IN], [T1, [P[0] + 1.75 * (P[0] - 380), P[1] + 1.75 * (P[1] - 230)]]] }, kids: [
       panoLayer('sky', .05, 60), panoLayer('far', .45, 520), panoLayer('mid', 1, 1500),
       piv('team (hero)', A('TEAM', 'team_center'), { a: { o: [[T0, [A('TEAM', 'team_center')[0] + 40, A('TEAM', 'team_center')[1] + 60], PREM], [T1, [A('TEAM', 'team_center')[0] - 20, A('TEAM', 'team_center')[1] - 30]]], s: [[T0, 1.12, LIN], [T1, 1.18]] }, kids: [E('g', 'team rig', { id: 'p-s4team', kids: [teamRig('team', { t0: 5900, t1: 9600, period: 420 })] })] }),
       ...Array.from({ length: 18 }, (_, i) => { const t = 6000 + i * 190, sl = L('TEAM', 'sleigh-santa'); return sparkle(sl.x + 40, sl.y + sl.h * .55 + R(-30, 30), R(16, 38), t, R(800, 1200), R(-420, -260), R(30, 120)); }),
     ] }),
   ] }),
   ...Array.from({ length: 10 }, () => { const y = R(0, 1080); return spr('speed line', 'streak.jpg', 960, y, 2400, R(30, 70), { ...light, a: { op: [[0, 0], [5700, 0], [5800, R(.2, .45)], [6150, 0]], o: [[5700, [2400, y], OUT], [6150, [-600, y]]] } }); }),
-], { id: 'p-s4', a: { op: visible(5750, 9500) } });
+], { id: 'p-s4', a: { op: visible(5750, 9500), f: [[9200, blur(0)], [9500, blur(12)]] } });   // the push into Santa blurs into S5's zoom-in
 const whipOut = piv('S2 whip-out wrapper', P, { id: 'p-s2', a: { o: [[5650, P, WHIP], [5950, [-700, 540]]], f: [[5650, blur(0)], [5800, blur(24)], [5950, blur(40)]] }, kids: [s2] });
 
 // ---------------- S5 the Nice List (9500-12300) ----------------
@@ -193,13 +199,16 @@ const paper = piv('list sway (hangs from the rod)', [PX0 + PW / 2, RODY], { a: {
   ] }),
   rect('roll (the rolled-up paper)', PX0 - 6, RODY - 14, PW + 12, 28, { rx: 14, fill: { type: 'linear-gradient', value: { from: { x: 0, y: 0 }, to: { x: 0, y: 1 }, stops: [{ offset: 0, color: { r: 250, g: 240, b: 216, a: 1 } }, { offset: .55, color: { r: 214, g: 196, b: 158, a: 1 } }, { offset: 1, color: { r: 150, g: 128, b: 92, a: 1 } }] } }, a: { o: [[U0, [PX0 - 6, RODY - 14], cb(.35, 0, .25, 1)], [U1, [PX0 - 6, RODY + PH - 14]]], op: [[0, 1], [U1 - 1, 1], [U1 + 120, 0]] } }),
 ])] });
-const s5 = G('S5 the Nice List (medium close-up)', [
+// in: S4's push carries on as a zoom out of blur; out: the stamp jolts the camera, then a whip-tilt up to the sky over the rooftop (S6 rides the same move)
+const S5P = [960, 470], WHIPV = [12240, 12520];
+const s5 = piv('S5 the Nice List (medium close-up)', S5P, { a: { op: visible(9500, WHIPV[1]), s: [[9500, 1.4, OUT], [10000, 1]], f: [[9500, blur(12)], [9850, blur(0)], [WHIPV[0], blur(0)], [12380, blur(26)], [WHIPV[1], blur(30)]],
+  o: [[9500, S5P], [STAMP, S5P, OUT], [STAMP + 40, [S5P[0], S5P[1] + 9], SINE], [STAMP + 90, [S5P[0] - 5, S5P[1] - 4], SINE], [STAMP + 150, [S5P[0] + 2, S5P[1] + 2], SINE], [WHIPV[0], S5P, WHIP], [WHIPV[1], [S5P[0], S5P[1] + H]]] }, kids: [
   piv('s5-camera (slow push)', [960, 560], { a: { s: [[9500, 1.0, GLIDE], [12300, 1.07]], o: [[9500, [960, 600], GLIDE], [12300, [960, 560]]] }, kids: [
     E('image', 'town bokeh', { o: [-700, -120], shape: img(L(PANO, 'far').file, 3400, 1300), filter: blur(14), op: .85 }),
     ...Array.from({ length: 9 }, () => { const x = R(0, 1920), y = R(150, 950), z = R(40, 120); return glow('bokeh', x, y, z, z, osc(9500, 12300, R(1400, 2600), .15, .5)); }),
     piv('santa (breathes)', [960, 1080], { a: { s: osc(9500, 12300, 1800, [1, 1], [1.004, 1.012], SINE) }, kids: [plate(S5, 'santa-mcu'), plate(S5, 'arm-rod'), paper] }),
   ] }),
-], { a: { op: visible(9500, 12300) } });
+] });
 IDP = 'd'; idn = ID5 + 33;
 
 // ---------------- S6 the drop + S7 down the chimney (12300-15600) ----------------
@@ -208,7 +217,7 @@ const TS = MAN.TUMBLE.layers, TN = 24, TW = 210, TH = TW * TS.tumble00.h / TS.tu
 const arcPt = u => { const a = [430, 330], b = [HOVER[0] - 40, HOVER[1] - 260], c = HOVER; return [(1 - u) ** 2 * a[0] + 2 * u * (1 - u) * b[0] + u * u * c[0], (1 - u) ** 2 * a[1] + 2 * u * (1 - u) * b[1] + u * u * c[1]]; };
 const giftPath = []; for (let k = 0; k <= 8; k++) { const u = k / 8, t = GT0 + (GT1 - GT0) * (1 - (1 - u) ** 1.6); giftPath.push([t, arcPt(u), LIN]); }
 const tumble = G('gift tumble (24-frame sequence)', Array.from({ length: TN }, (_, k) => { const keys = [[0, 0]]; for (let t = GT0, f = 0; t < GT1 + 300; t += 42, f++) if (f % TN === k) { keys.push([t, 0], [t + 1, 1], [t + 41, 1], [t + 42, 0]); } return spr('tumble ' + k, TS['tumble' + String(k).padStart(2, '0')].file, 0, 0, TW, TH, { a: { op: keys } }); }));
-const s6 = G('S6 the drop (rooftop)', [
+const s6 = piv('S6 the drop (rooftop)', P, { id: 'p-s6', a: { op: [[0, 0], [WHIPV[0] - 1, 0], [WHIPV[0], 1], [15150, 1], [15250, 0]], o: [[WHIPV[0], [P[0], P[1] - H], WHIP], [WHIPV[1], P]], f: [[WHIPV[0], blur(30)], [12380, blur(26)], [WHIPV[1], blur(0)]] }, kids: [
   camLayer('sky (+ stars)', K6, .06, [E('image', 'sky', { o: [L(S6, 'sky').x, L(S6, 'sky').y - 500], shape: img(L(S6, 'sky').file, L(S6, 'sky').w, L(S6, 'sky').h + 500) }), ...stars(30, 600, 12300, 15200)]),
   camLayer('moon', K6, depthFactor(S6, 'moon', F6), [(() => { const m = L(S6, 'moon'); return glow('moon glow', m.x + m.w / 2, m.y + m.h / 2, m.w * 2.8, m.h * 2.8, [[0, .5]]); })(), plate(S6, 'moon')]),
   piv('team swoops overhead', P, { a: { o: [[12300, [-360, 330], SOFT], [13250, [700, 150], SOFT], [14100, [2300, 260]]], s: [[12300, .38, LIN], [14100, .3]], r: [[12300, -6, SOFT], [13250, -12, SOFT], [14100, -2]] }, kids: [E('g', 'team rig', { id: 'p-s6team', kids: [teamRig('team (small)', { t0: 12300, t1: 14100, period: 360, bells: false, arm: { r: [[12300, 0, OUT], [12850, -38, SPRING], [13050, 62, OUT], [13400, 20, IO], [13800, 0]] } })] })] }),
@@ -222,7 +231,7 @@ const s6 = G('S6 the drop (rooftop)', [
     ...Array.from({ length: 12 }, (_, i) => { const t = GT0 + i * 100, p = arcPt(Math.min((t - GT0) / (GT1 - GT0), 1)); return sparkle(p[0], p[1], R(14, 30), t, R(600, 900), R(-60, 20), R(-40, 30)); }),
   ]),
   camLayer('chimney', K6, depthFactor(S6, 'chimney', F6), [plate(S6, 'chimney'), glow('firelight from the mouth', MOUTH[0], MOUTH[1] - 20, 260, 160, [[0, .5], ...osc(12300, 15200, 500, .45, .7)])]),
-], { id: 'p-s6', a: { op: [[0, 0], [12299, 0], [12300, 1], [15150, 1], [15250, 0]] } });
+] });
 const MP = L(S6, 'mouth');
 const s7 = G('S7 down the chimney', [
   piv('flue push', P, { a: { s: [[14950, 1.0, IN], [15600, 2.6]] }, kids: [E('image', 'mouth (looking down the flue)', { o: [MP.x, MP.y], shape: img(MP.file, MP.w, MP.h) })] }),
@@ -274,18 +283,20 @@ const product = G('EDIT ME 1 - product-image (rises from the box)', [
     ] }),
   ] }),
 ]);
-const roomL = (n, kids = []) => camLayer(n, KR, rl_(n), [plate(RM, n), ...kids]);
+// focus pull: as the camera pushes in on the gift the room behind (and the foreground) goes soft; the pull-back sharpens it, a touch soft behind the end card
+const FOCUS = (b, e) => [[17500, blur(0)], [18300, blur(b)], [20100, blur(b)], [20700, blur(e)]];
+const roomL = (n, kids = [], focus) => camLayer(n, KR, rl_(n), [plate(RM, n), ...kids], {}, focus);
 const RB = MAN.ANCH_ROOM.anchors;
 const s8 = G('S8-S10 the living room', [
-  roomL('back'),
-  roomL('fire', RB.flames.filter((f, i) => i % 2 === 0).map(([x, y, r]) => glow('flame', x, y - r, r * 8, r * 10, osc(15600 + R(0, 300), 23000, R(700, 1000), .4, .85)))),
-  roomL('tree', RB.bulbs.filter((b, i) => i % 2 === 0).map(([x, y, r], i) => glow('tree light', x, y, r * 6, r * 6, [[0, .2], ...osc(15600 + i * 37, 23000, 2200, .25, .9)]))),
+  roomL('back', [], FOCUS(4, 2.5)),
+  roomL('fire', RB.flames.filter((f, i) => i % 2 === 0).map(([x, y, r]) => glow('flame', x, y - r, r * 8, r * 10, osc(15600 + R(0, 300), 23000, R(700, 1000), .4, .85))), FOCUS(4, 2.5)),
+  roomL('tree', RB.bulbs.filter((b, i) => i % 2 === 0).map(([x, y, r], i) => glow('tree light', x, y, r * 6, r * 6, [[0, .2], ...osc(15600 + i * 37, 23000, 2200, .25, .9)])), FOCUS(4, 2.5)),
   roomL('rug'),
   camLayer('gift + product (rest on the rug)', KR, 1, [
     piv('contact shadow (stays on the floor)', [BB[0], BB[1] - 6], { a: { op: [[0, 0], [16400, 0], [LAND, .75], [16960, .45], [17110, .75]], s: [[16400, .45, IN], [LAND, 1, OUT], [16960, .8, IN], [17110, 1]] }, kids: [rect('shadow', BB[0] - 300, BB[1] - 46, 600, 80, { rx: 40, fill: col([24, 10, 4], .8), filter: blur(22) })] }),
     giftRig, beam, product,
   ]),
-  roomL('near'),
+  roomL('near', [], FOCUS(7, 4)),
   rect('warm grade (soft-light)', 0, 0, W, H, { fill: col([255, 170, 90]), blend: 'soft-light', op: .07 }),
 ], { id: 'p-room', a: { op: [[0, 0], [15699, 0], [15700, 1]] } });
 
@@ -293,7 +304,11 @@ const s8 = G('S8-S10 the living room', [
 const TX = 1180, AC = C.accent;
 const endText = G('EDIT ME 4 - end card: logo, headline, cta-text, signoff', [
   rect('end-card scrim (keeps the words legible)', 760, 0, 1160, H, { fill: { type: 'linear-gradient', value: { from: { x: 0, y: 0 }, to: { x: 1, y: 0 }, stops: [{ offset: 0, color: { r: 12, g: 8, b: 6, a: 0 } }, { offset: .45, color: { r: 12, g: 8, b: 6, a: .55 } }, { offset: 1, color: { r: 12, g: 8, b: 6, a: .7 } }], spread: 'pad', fixed: false } }, a: { op: [[0, 0], [20100, 0], [20800, 1]] } }),
-  G('logo-reveal', [E('image', 'logo', { o: [TX, 210], shape: img(C.logo, C.logoBox[0], C.logoBox[1], 'xMinYMid meet') })], { a: { op: [[0, 0], [20350, 0], [20800, 1]], o: [[20350, [0, 18], OUT], [20800, [0, 0]]] } }),
+  G('logo-reveal', [   // a ribbon wipe: the logo is unveiled left to right behind an accent-coloured edge
+    E('mask', 'logo wipe', { id: 'm-logo', kids: [rect('wipe', TX - 20, 196, 1, C.logoBox[1] + 28, { id: 'x-logo-wipe', fill: col([255, 255, 255]), a: { size: [[20350, [1, C.logoBox[1] + 28], SOFT], [20950, [C.logoBox[0] + 40, C.logoBox[1] + 28]]] } })] }),
+    E('image', 'logo', { o: [TX, 210], shape: img(C.logo, C.logoBox[0], C.logoBox[1], 'xMinYMid meet') }),
+    rect('ribbon edge (accent)', TX - 26, 196, 5, C.logoBox[1] + 28, { id: 'x-logo-ribbon', fill: col(AC), a: { o: [[20350, [TX - 26, 196], SOFT], [20950, [TX + C.logoBox[0] + 14, 196]]], op: [[0, 0], [20349, 0], [20350, 1], [20850, 1], [21050, 0]] } }),
+  ], { mask: 'm-logo', a: { op: [[0, 0], [20349, 0], [20350, 1]], o: [[20350, [0, 10], OUT], [20950, [0, 0]]] } }),
   E('g', 'headline (masked line rise)', { mask: 'm-head', kids: [
     E('mask', 'headline mask', { id: 'm-head', kids: [rect('window', TX - 20, 330, 760, 230, { fill: col([255, 255, 255]) })] }),
     ...C.headline.map((s, i) => G('headline-line-' + (i + 1), [txt('headline line ' + (i + 1) + ' (edit me)', s, TX, 420 + i * 92, 'Fraunces', 84, 600, { italic: i === 1, color: i === 1 ? AC : [255, 246, 230] })],
@@ -306,7 +321,13 @@ const endText = G('EDIT ME 4 - end card: logo, headline, cta-text, signoff', [
   G('signoff', [txt('signoff (edit me)', C.signoff, TX, 712, 'Fraunces', 30, 500, { italic: true, color: [255, 220, 170] })], { a: { op: [[0, 0], [22000, 0], [22500, 1]], o: [[22000, [0, 12], OUT], [22500, [0, 0]]] } }),
 ]);
 const title1 = G('EDIT ME 5 - title-line (opening)', [
-  E('g', 'title (fades out)', { a: { op: [[0, 1], [2650, 1], [3100, 0]] }, kids: [E('g', 'title (blur-in)', { a: { op: [[0, 0], [350, 0], [1300, 1]], f: [[350, blur(14)], [1300, blur(0)]], o: [[350, [0, 14], OUT], [1300, [0, 0]]] }, kids: [txt('title-line (edit me)', C.title, 120, 160, 'Fraunces', 64, 500, { italic: true })] })] }),
+  E('g', 'title (fades out)', { a: { op: [[0, 1], [2650, 1], [3100, 0]] }, kids: [
+    E('g', 'title (masked line rise)', { id: 'x-title-masked', mask: 'm-title', kids: [
+      E('mask', 'title window', { id: 'm-title', kids: [rect('window', 80, 60, 1500, 130, { id: 'x-title-window', fill: col([255, 255, 255]) })] }),
+      E('g', 'title (rises)', { a: { op: [[0, 0], [340, 0], [350, 1]], o: [[350, [0, 100], SOFT], [1300, [0, 0]]] }, kids: [txt('title-line (edit me)', C.title, 120, 160, 'Fraunces', 64, 500, { italic: true })] }),
+    ] }),
+    rect('gold rule (draws under the title)', 122, 186, 1, 2, { id: 'x-title-rule', fill: col([226, 186, 104], .85), a: { size: [[800, [1, 2], SOFT], [1700, [360, 2]]] } }),
+  ] }),
 ]);
 
 // ---------------- snow (all exterior shots) ----------------
