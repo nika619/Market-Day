@@ -356,9 +356,14 @@ const finish = G('finish: vignette, letterbox', [
 ]);
 const readme = G('README (outside the canvas: how to make it yours)', [txt('readme', 'MAKE IT YOURS: 1 product-image  2 logo (sack + end card)  3 tag-to  4 headline, cta-text, signoff  5 accent colour on the cta pill + headline line 2. Nothing else needs touching.', 0, 1240, 'DM Sans', 22, 500, { color: [255, 230, 190] })]);
 
+// living camera: a slow, layered-sine handheld drift (position, roll, a breath of zoom) on each shot, so no frame is ever locked off
+const hand = (t0, t1, amp, seed) => { const o = [], r = [], s = [], n = (u, a, b, c) => Math.sin(u * a + seed * 1.7) * .6 + Math.sin(u * b + seed * 3.1) * .3 + Math.sin(u * c + seed * .4) * .1;
+  for (let t = t0; t <= t1 + 399; t += 400) { const u = t / 1000; o.push([t, [P[0] + 7 * amp * n(u, 1.3, 2.9, 5.3), P[1] + 5 * amp * n(u, 1.1, 2.3, 4.7)], SINE]); r.push([t, .32 * amp * n(u, .9, 1.9, 3.7), SINE]); s.push([t, 1.02 + .006 * amp * n(u, .7, 1.6, 2.9), SINE]); }
+  return { o, r, s }; };
+const handheld = (shot, t0, t1, amp, seed) => piv('handheld (living camera)', P, { a: hand(t0, t1, amp, seed), kids: [shot] });
 const doc = { id: 'svg-delivery', type: 'svg', animation: { duration: DUR, direction: 1, iterations: 1, fill: 1, alternate: false, speed: 1 },
   properties: { shape: { position: { x: 0, y: 0 }, size: { width: W, height: H }, bgColor: col([4, 6, 14]) } },
-  children: [s1, title1, whipOut, s4, s5, s6, s7, s8, bridge, endText, snow, finish, readme] };
+  children: [handheld(s1, 0, 3600, 1, 1), title1, handheld(whipOut, 3100, 5950, .8, 2), handheld(s4, 5700, 9500, 1.2, 3), handheld(s5, 9500, 12520, .7, 4), handheld(s6, 12240, 15250, 1.1, 5), s7, handheld(s8, 15600, 23000, .9, 6), bridge, endText, snow, finish, readme] };
 
 (function check() {
   let n = 0, keysN = 0, imgs = new Set();
