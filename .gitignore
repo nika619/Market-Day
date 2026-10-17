@@ -1,3 +1,9 @@
 # rendered frames, previews and generated bundles stay local
 *.png.tmp
 node_modules/
+
+# SPECIAL DELIVERY: local preview frames and generated upload bundles
+build/dl_*/
+build/delivery*.js
+build/delivery*.json
+build/delivery*-chunks/
