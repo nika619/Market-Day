@@ -7,3 +7,5 @@ build/dl_*/
 build/delivery*.js
 build/delivery*.json
 build/delivery*-chunks/
+build/delivery-ops/
+build/tr/
