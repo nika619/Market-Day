@@ -29,6 +29,10 @@ function client(wsUrl) {
       // images inside SVG are not in document.images: wait until every <image> has decoded
       await c.send('Runtime.evaluate', { expression: "Promise.all([...document.querySelectorAll('image')].map(im=>new Promise(res=>{const i=new Image();i.onload=i.onerror=res;i.src=im.getAttribute('href');})))", awaitPromise: true });
       console.log('ready', w); await sleep(800);
+      if (process.env.TRANSPARENT) {   // alpha PNGs (single layers for compositing): no page, body or canvas background
+        await c.send('Emulation.setDefaultBackgroundColorOverride', { color: { r: 0, g: 0, b: 0, a: 0 } });
+        await c.send('Runtime.evaluate', { expression: "document.documentElement.style.background=document.body.style.background='transparent';document.querySelector('svg').style.background='transparent'" });
+      }
       while (frames.length) {
         const i = frames.shift(), tms = Math.round(+(process.env.START || 0) + i * 1000 / fps);
         await c.send('Runtime.evaluate', { expression: `seek(${tms})` });
