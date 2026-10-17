@@ -25,9 +25,9 @@ const CH = {
   size: ['shape', 'size', v => ({ width: f1(v[0]), height: f1(v[1]) })],
   f: ['filter', 'list', v => v],
 };
-let idn = 0;
+let idn = 0, IDP = 'd';
 function E(type, title, o = {}) {
-  const n = { id: (o.id || 'd' + (++idn)), type, title, properties: {} }, p = n.properties;
+  const n = { id: (o.id || IDP + (++idn)), type, title, properties: {} }, p = n.properties;
   if (o.o) o.o = o.o.map(r1); if (o.t) o.t = o.t.map(r1);
   const tr = {};
   if (o.o) tr.origin = { x: o.o[0], y: o.o[1] };
@@ -158,6 +158,7 @@ const s4 = G('S4 the team (tracking over the town)', [
 const whipOut = piv('S2 whip-out wrapper', P, { id: 'p-s2', a: { o: [[5650, P, WHIP], [5950, [-700, 540]]], f: [[5650, blur(0)], [5800, blur(24)], [5950, blur(40)]] }, kids: [s2] });
 
 // ---------------- S5 the Nice List (9500-12300) ----------------
+const ID5 = idn; IDP = 's5-'; idn = 0;   // shortcut: S5 has its own id prefix and later ids keep their old numbers (d332...), so the project already in SVGator only needs S5 replaced; drop when re-uploading everything
 const S5 = 'S5', rl = A(S5, 'rod_l'), rr = A(S5, 'rod_r'), RODY = (rl[1] + rr[1]) / 2 + 12, PX0 = Math.min(rl[0], rr[0]) + 26, PX1 = Math.max(rl[0], rr[0]) - 26, PW = PX1 - PX0, PH = 470, U0 = 9800, U1 = 10450;
 // the list is the setup, the gift tag is the payoff: entry 4 is the tag's recipient, circled, ticked and stamped
 const INK = [58, 40, 30], RED = [168, 40, 34], LX = PX0 + 62, LY = i => RODY + 122 + i * 50;
@@ -199,6 +200,7 @@ const s5 = G('S5 the Nice List (medium close-up)', [
     piv('santa (breathes)', [960, 1080], { a: { s: osc(9500, 12300, 1800, [1, 1], [1.004, 1.012], SINE) }, kids: [plate(S5, 'santa-mcu'), plate(S5, 'arm-rod'), paper] }),
   ] }),
 ], { a: { op: visible(9500, 12300) } });
+IDP = 'd'; idn = ID5 + 33;
 
 // ---------------- S6 the drop + S7 down the chimney (12300-15600) ----------------
 const S6 = 'S6', F6 = 3.8, MOUTH = A(S6, 'mouth'), HOVER = [A(S6, 'mouth')[0], A(S6, 'mouth')[1] - 210], K6 = [[12300, 1.0, 0, -240, 0, PREM], [13300, 1.0, 0, -120, 0, IO], [14500, 1.02, 0, 0, 0, IN], [15150, 1.9, 960 - MOUTH[0], 540 - MOUTH[1] + 120, 0, LIN]];
